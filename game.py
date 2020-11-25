@@ -26,15 +26,10 @@ def level_one():
     global obstacle_one_direction, obstacle_one_speed
     coords = canvas.coords(box1)
     print(coords)
-    if coords[3] >= 930:
-        obstacle_one_direction = True
-    elif coords[3] <= 250:
-        obstacle_one_direction = False
-
-    if obstacle_one_direction == True:
-        canvas.move(box1, 0, -obstacle_one_speed)
-    else:
-        canvas.move(box1, 0, obstacle_one_speed)
+    if coords[3] >= 930: obstacle_one_direction = True
+    elif coords[3] <= 250: obstacle_one_direction = False
+    if obstacle_one_direction == True: canvas.move(box1, 0, -obstacle_one_speed)
+    else: canvas.move(box1, 0, obstacle_one_speed)
     window.after(2, level_one)
 
 
