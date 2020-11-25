@@ -12,7 +12,7 @@ def windowconfig():
     window.geometry("1920x1080")
     window.attributes("-fullscreen", True)
     window.bind('<Escape>', lambda x: quitgame())
-    window.bind("p", lambda x: pausegame())
+    window.bind("p", lambda x: pausegame("Paused"))
     window.bind("<Key>", moveplayer)
     canvas = Canvas(window, width=1920, height=1080)
     canvas.pack()
@@ -30,19 +30,24 @@ def level_static():
 
 def level_one():
     global pause, obstaclecoords, obstacledirection, obstaclespeed, initialrun
+    
     if initialrun == True:
         obstacle.append(canvas.create_oval(200, 200, 250, 250, fill="blue", width=5))
-        obstaclespeed.append(3)
-        obstacledirection.append(False)
-        initialrun = False
     
     obstaclecoords[0] = canvas.coords(obstacle[0])
-    if obstaclecoords[0][3] >= 930: obstacledirection[0] = True
-    elif obstaclecoords[0][3] <= 200: obstacledirection[0] = False
+    
+    if initialrun == True:
+        obstaclespeed.append(3)
+        obstacledirection.append(False)
+        collisiondetection()
+        initialrun = False
+    
+    if obstaclecoords[0][3] >= 920: obstacledirection[0] = True
+    elif obstaclecoords[0][3] <= 210: obstacledirection[0] = False
     if obstacledirection[0] == True: canvas.move(obstacle[0], 0, -obstaclespeed[0])
     else: canvas.move(obstacle[0], 0, obstaclespeed[0])
     if pause == False:
-        window.after(2, lambda: level_one())
+        window.after(2, level_one)
 
 def playerconfig():
     global player
@@ -101,33 +106,42 @@ def deleteleaderpage():
     gohomebutton.destroy()
     welcomepage()
     
-def pausegame():
-    global pause, pausetext, pausepopup
-    pause = not pause
-    print(pause)
-    if pause == True:
-        pausetext = canvas.create_text(960, 450, text="Paused", font=("Helvetica", 80), fill="Black")
-        pausepopup = canvas.create_rectangle(0, 0, 1920,1080, fill="black", stipple="gray75")
-    else:
-        canvas.delete(pausetext, pausepopup)
-        restartgame()
+def pausegame(input):
+    global pause, pausetext, pausepopup, initialrun
+    if initialrun != True:
+        pause = not pause
+        if pause == True:
+            pausetext = canvas.create_text(960, 450, text=input, font=("Helvetica", 80), fill="Black")
+            pausepopup = canvas.create_rectangle(0, 0, 1920,1080, fill="black", stipple="gray75")
+            window.bind("<Key>", collisiondetection)
+        else:
+            canvas.delete(pausetext, pausepopup)
+            window.bind("<Key>", moveplayer)
+            restartgame()
 
 def restartgame():
     global currentlevel
     if currentlevel == 1:
         level_one()
-    # elif currentlevel == 2:
+
+def collisiondetection():
+    collision[0] = canvas.find_overlapping(obstaclecoords[0][0], obstaclecoords[0][1], obstaclecoords[0][2], obstaclecoords[0][3])
+    for i in range(len(collision)):
+        if collision[i][0] == 5:
+            pausegame("Game Over!")
+        else:
+            window.after(2, collisiondetection)    
 
 
-pause = False
 currentlevel = 1
 obstacle = []
 obstacledirection = []
 obstaclespeed = []
 obstaclecoords = [()]
+collision= [()]
 initialrun = True
+pause = False
 
 windowconfig()
 welcomepage()
-
 window.mainloop()
