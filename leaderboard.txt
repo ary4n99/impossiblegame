@@ -1,2 +1,2 @@
-90 - Aryan Agrawal
-80 - John Doe
+Aryan Agrawal,100
+John Doe,90
