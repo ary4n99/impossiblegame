@@ -1,5 +1,5 @@
 from tkinter import Tk, Canvas, Label, Button, messagebox, CENTER, PhotoImage, Entry
-import sys
+import sys, random
 
 #RESOLUTION: 1920x1080
 #CHEATKEY: c
@@ -22,36 +22,43 @@ def windowconfig():
     workphotolabel.image = workphoto
 
 def level_static():
-    global obstacle, startarea, endarea
+    global obstacle, endarea
     bordercolour = "black"
     canvas.create_rectangle(0, 0, 1920, 150, fill=bordercolour, width=0)
     canvas.create_rectangle(0, 930, 1920, 1080, fill=bordercolour, width=0)
     canvas.create_rectangle(0, 0, 20, 1080, fill=bordercolour, width=0)
     canvas.create_rectangle(1900, 0, 1920, 1080, fill=bordercolour, width=0)
-    startarea = canvas.create_rectangle(20, 150, 160, 930, fill="palegreen1", width=0)
     endarea = canvas.create_rectangle(1760, 150, 1900, 930, fill="palegreen1", width=0)
-    canvas.tag_lower(startarea)
     canvas.tag_lower(endarea)
 
+
 def level_one():
-    global pause, obstaclecoords, obstacledirection, obstaclespeed, initialrun
+    global pause, obstaclecoords, obstacledirection, obstaclespeed, initialrun, obstaclelength
     
     if initialrun == True:
-        obstacle.append(canvas.create_oval(200, 200, 250, 250, fill="blue", width=5))
-    
-    obstaclecoords[0] = canvas.coords(obstacle[0])
+        x = 300
+        y = 300
+        obstaclelength = len(obstaclecoords)
+        for i in range(obstaclelength):
+            obstacle.append(canvas.create_oval(x+i*y, x+i*y, x+100+i*y, x+100+i*y, fill="blue", width=5))
+            obstaclespeed.append(random.randint(1,2))
+
+    for j in range(obstaclelength):
+        obstaclecoords[j] = canvas.coords(obstacle[j])
     
     if initialrun == True:
-        obstaclespeed.append(3)
-        obstacledirection.append(False)
+        for y in range(obstaclelength):
+            obstacledirection.append(False)
         collisiondetection()
         borderdetection()
         initialrun = False
+
+    for k in range(len(obstacle)):
+        if obstaclecoords[k][3] >= 930: obstacledirection[k] = True
+        elif obstaclecoords[k][3] <= 250: obstacledirection[k] = False
+        if obstacledirection[k] == True: canvas.move(obstacle[k], 0, -obstaclespeed[k])
+        else: canvas.move(obstacle[k], 0, obstaclespeed[k])
     
-    if obstaclecoords[0][3] >= 920: obstacledirection[0] = True
-    elif obstaclecoords[0][3] <= 210: obstacledirection[0] = False
-    if obstacledirection[0] == True: canvas.move(obstacle[0], 0, -obstaclespeed[0])
-    else: canvas.move(obstacle[0], 0, obstaclespeed[0])
     if pause == False:
         window.after(2, level_one)
 
@@ -117,10 +124,16 @@ def pausegame(inputtext):
         pause = not pause
         if pause == True:
             pausetext = canvas.create_text(960, 450, text=inputtext, font=("Helvetica", 80), fill="Black")
-            window.unbind("<Key>")
+            window.unbind(leftkey)
+            window.unbind(upkey)
+            window.unbind(rightkey)
+            window.unbind(downkey)
         else:
             canvas.delete(pausetext)
-            window.bind("<Key>", moveplayer)
+            window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
+            window.bind(upkey, lambda x: canvas.move(player, 0, -10))
+            window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
+            window.bind(downkey, lambda x: canvas.move(player, 0, 10))
             if currentlevel == 1:
                 level_one()
 
@@ -128,7 +141,7 @@ def restartgame():
      screenclear()
      gameoverbutton.destroy()
      savestatsbutton.destroy()
-     canvas.delete(player, startarea, endarea)
+     canvas.delete(player, endarea)
      for i in range(len(obstacle)):
          canvas.delete(obstacle[i])
      initialize()
@@ -170,25 +183,23 @@ def updateleaderboard():
                 file.writelines(line)
 
 def collisiondetection():
-    global gameoverbutton, savestatsbutton, isgameover, cheaton
-    collision[0] = canvas.find_overlapping(obstaclecoords[0][0], obstaclecoords[0][1], obstaclecoords[0][2], obstaclecoords[0][3])
-    for i in range(len(collision)):
-        if len(collision[i]) == 2 and cheaton == False:
-            isgameover = True
-            pausegame("Game Over!")
-            gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
-            gameoverbutton.place(x=960, y=600, anchor=CENTER)
-            savestatsbutton = Button(canvas, text="Save stats", font=("Helvetica", 20), command=savestats)
-            savestatsbutton.place(x=960, y=700, anchor=CENTER)
-            window.unbind("p")
-            window.unbind(downkey)  
-            window.unbind(upkey)
-            window.unbind(leftkey)
-            window.unbind(rightkey)      
-        else:
-            window.after(2, collisiondetection)    
+    global gameoverbutton, savestatsbutton, isgameover, cheaton, collision, obstaclecoords, playercoords
+    playercoords = canvas.coords(player)
+    collision = canvas.find_overlapping(playercoords[0], playercoords[1], playercoords[2], playercoords[3])
+    if len(collision) == 2 and cheaton == False:
+        isgameover = True
+        pausegame("Game Over!")
+        gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
+        gameoverbutton.place(x=960, y=600, anchor=CENTER)
+        savestatsbutton = Button(canvas, text="Save stats", font=("Helvetica", 20), command=savestats)
+        savestatsbutton.place(x=960, y=700, anchor=CENTER)
+        window.unbind("p")
+
+    if isgameover == False:
+        window.after(2, collisiondetection)    
 
 def borderdetection():
+    global playercoords
     playercoords = canvas.coords(player)
     if pause == False:
         if playercoords[0] <= 20:
@@ -226,11 +237,11 @@ def initialize():
     obstacle = []
     obstacledirection = []
     obstaclespeed = []
-    obstaclecoords = [()]
-    collision= [()]
+    obstaclecoords = [(),(),(),(),()]
     initialrun = True
     pause = False
     cheaton = False
+    isgameover = False
     bossmode = False
     window.bind("<Escape>", lambda x: quitgame())
     window.bind("p", lambda x: pausegame("Paused"))
@@ -292,10 +303,10 @@ def configureuserkeys():
     if len(upkey) != 1 or len(downkey) != 1 or len(leftkey) != 1 or len(rightkey) != 1 or upkey.isalpha() == False or downkey.isalpha() == False or leftkey.isalpha() == False or rightkey.isalpha() == False:
         messagebox.showerror("Invalid input", "Please enter 1 alphabetical character for each prompt.", icon = "error")
         keyprompt()
-    if upkey == "p" or downkey == "p" or leftkey == "p" or rightkey == "p" or upkey == "x" or downkey == "x" or leftkey == "x" or rightkey == "x" or upkey == "c" or downkey == "c" or leftkey == "c" or rightkey == "c":
+    elif upkey == "p" or downkey == "p" or leftkey == "p" or rightkey == "p" or upkey == "x" or downkey == "x" or leftkey == "x" or rightkey == "x" or upkey == "c" or downkey == "c" or leftkey == "c" or rightkey == "c":
         messagebox.showerror("Invalid input", "These are protected keys, please choose others.", icon = "error")
         keyprompt()
-    if upkey == downkey or upkey == leftkey or upkey == rightkey or downkey == leftkey or downkey == rightkey or leftkey == rightkey:
+    elif upkey == downkey or upkey == leftkey or upkey == rightkey or downkey == leftkey or downkey == rightkey or leftkey == rightkey:
         messagebox.showerror("Invalid input", "They can't be the same!", icon = "error")
         keyprompt()
     window.lift()
