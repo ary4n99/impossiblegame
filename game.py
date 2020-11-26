@@ -28,6 +28,7 @@ def level_static():
     startarea = canvas.create_rectangle(20, 150, 160, 930, fill="palegreen1", width=0)
     endarea = canvas.create_rectangle(1760, 150, 1900, 930, fill="palegreen1", width=0)
     canvas.tag_lower(startarea)
+    canvas.tag_lower(endarea)
 
 def level_one():
     global pause, obstaclecoords, obstacledirection, obstaclespeed, initialrun
@@ -41,6 +42,7 @@ def level_one():
         obstaclespeed.append(3)
         obstacledirection.append(False)
         collisiondetection()
+        borderdetection()
         initialrun = False
     
     if obstaclecoords[0][3] >= 920: obstacledirection[0] = True
@@ -53,13 +55,10 @@ def level_one():
 def playerconfig():
     global player
     player = canvas.create_rectangle(50, 540, 130, 620, fill="red", width=5)
-
-def moveplayer(event):
-    move_factor = 10
-    if event.char == "a": canvas.move(player, -move_factor, 0)
-    elif event.char == "d": canvas.move(player, move_factor, 0)
-    elif event.char == "w": canvas.move(player, 0, -move_factor)
-    elif event.char == "s": canvas.move(player, 0, move_factor)
+    window.bind("a", lambda x: canvas.move(player, -10, 0))
+    window.bind("d", lambda x: canvas.move(player, 10, 0))
+    window.bind("w", lambda x: canvas.move(player, 0, -10))
+    window.bind("s", lambda x: canvas.move(player, 0, 10))
 
 def welcomepage():
     global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext
@@ -177,19 +176,45 @@ def updateleaderboard():
                 file.writelines(line)
 
 def collisiondetection():
-    global gameoverbutton, savestatsbutton, pause
+    global gameoverbutton, savestatsbutton, isgameover
     collision[0] = canvas.find_overlapping(obstaclecoords[0][0], obstaclecoords[0][1], obstaclecoords[0][2], obstaclecoords[0][3])
     for i in range(len(collision)):
-        print(collision[i])
         if len(collision[i]) == 2:
+            isgameover = True
             pausegame("Game Over!")
             gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
             gameoverbutton.place(x=960, y=600, anchor=CENTER)
             savestatsbutton = Button(canvas, text="Save stats", font=("Helvetica", 20), command=savestats)
             savestatsbutton.place(x=960, y=700, anchor=CENTER)
+            window.unbind("p")
+            window.unbind("s")  
+            window.unbind("w")
+            window.unbind("a")
+            window.unbind("d")      
         else:
             window.after(2, collisiondetection)    
 
+def borderdetection():
+    playercoords = canvas.coords(player)
+    if pause == False:
+        if playercoords[0] <= 20:
+            window.unbind("a")
+        else:
+            window.bind("a", lambda x: canvas.move(player, -10, 0))
+        if playercoords[1] <= 150:
+            window.unbind("w")
+        else:
+            window.bind("w", lambda x: canvas.move(player, 0, -10))
+        if playercoords[2] >= 1900:
+            window.unbind("d")
+        else:
+            window.bind("d", lambda x: canvas.move(player, 10, 0))
+        if playercoords[3] >= 930:
+            window.unbind("s")    
+        else:
+            window.bind("s", lambda x: canvas.move(player, 0, 10))
+        window.after(2, borderdetection)  
+    
 def bosskey():
     global bossmode, workphotolabel, workphoto
     bossmode = not bossmode
@@ -201,7 +226,7 @@ def bosskey():
         workphotolabel.image = workphoto
 
 def initialize():
-    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score
+    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score, isgameover
     currentlevel = 1
     score = 0
     obstacle = []
@@ -215,7 +240,6 @@ def initialize():
     window.bind('<Escape>', lambda x: quitgame())
     window.bind("p", lambda x: pausegame("Paused"))
     window.bind("x", lambda x: bosskey())
-    window.bind("<Key>", moveplayer)
 
 windowconfig()
 initialize()
