@@ -109,16 +109,15 @@ def deleteleaderpage():
     gohomebutton.destroy()
     welcomepage()
     
-def pausegame(input):
-    global pause, pausetext, pausepopup, initialrun, currentlevel
+def pausegame(inputtext):
+    global pause, pausetext, initialrun, currentlevel
     if initialrun != True:
         pause = not pause
         if pause == True:
-            pausetext = canvas.create_text(960, 450, text=input, font=("Helvetica", 80), fill="Black")
-            pausepopup = canvas.create_rectangle(0, 0, 1920,1080, fill="black", stipple="gray25")
-            window.bind("<Key>", lambda x: collisiondetection)
+            pausetext = canvas.create_text(960, 450, text=inputtext, font=("Helvetica", 80), fill="Black")
+            window.unbind("<Key>")
         else:
-            canvas.delete(pausetext, pausepopup)
+            canvas.delete(pausetext)
             window.bind("<Key>", moveplayer)
             if currentlevel == 1:
                 level_one()
@@ -127,7 +126,7 @@ def restartgame():
      screenclear()
      gameoverbutton.destroy()
      savestatsbutton.destroy()
-     canvas.delete(pausepopup, player, startarea, endarea)
+     canvas.delete(player, startarea, endarea)
      for i in range(len(obstacle)):
          canvas.delete(obstacle[i])
      initialize()
@@ -178,9 +177,10 @@ def updateleaderboard():
                 file.writelines(line)
 
 def collisiondetection():
-    global gameoverbutton, savestatsbutton
+    global gameoverbutton, savestatsbutton, pause
     collision[0] = canvas.find_overlapping(obstaclecoords[0][0], obstaclecoords[0][1], obstaclecoords[0][2], obstaclecoords[0][3])
     for i in range(len(collision)):
+        print(collision[i])
         if len(collision[i]) == 2:
             pausegame("Game Over!")
             gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
