@@ -116,7 +116,7 @@ def pausegame(input):
         if pause == True:
             pausetext = canvas.create_text(960, 450, text=input, font=("Helvetica", 80), fill="Black")
             pausepopup = canvas.create_rectangle(0, 0, 1920,1080, fill="black", stipple="gray25")
-            window.bind("<Key>", collisiondetection)
+            window.bind("<Key>", lambda x: collisiondetection)
         else:
             canvas.delete(pausetext, pausepopup)
             window.bind("<Key>", moveplayer)
@@ -150,15 +150,16 @@ def updateleaderboard():
     scorelist = []
     with open("leaderboard.txt") as file:
         leaderboardlines = file.readlines()
+    with open("leaderboard.txt") as file:
         leaderboard = [line.strip() for line in file]
     
     for i in range(len(leaderboard)):
         leadersplit = leaderboard[i].split(",")
         scorelist.append(leadersplit[1])
-    
+
     insertindex = len(scorelist) + 1
     for i in range(len(scorelist)):
-        if scorelist[i] <= score:
+        if int(scorelist[i]) <= score:
             insertindex = i
     
     with open("leaderboard.txt", "w+") as file:
@@ -168,8 +169,13 @@ def updateleaderboard():
                 file.writelines(username + "," + str(score))
             else:
                 file.writelines(line)
-            print(line)
-
+    
+    with open("leaderboard.txt", "w") as file:
+        for i, line in enumerate(leaderboardlines):     
+            if i >=8:      
+                file.write() 
+            else:
+                file.writelines(line)
 
 def collisiondetection():
     global gameoverbutton, savestatsbutton
@@ -193,7 +199,6 @@ def bosskey():
         workphotolabel.destroy()
         workphotolabel = Label(image = workphoto)
         workphotolabel.image = workphoto
-
 
 def initialize():
     global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score
