@@ -2,7 +2,7 @@ from tkinter import Tk, Canvas, Label, Button, messagebox, CENTER, PhotoImage, E
 import sys, random
 
 #RESOLUTION: 1920x1080
-#CHEATKEY: c
+#CHEATKEY: hold c gor invincibility
 
 def quitgame():
     quitbox = messagebox.askquestion("Quit", "Are you sure you want to quit?", icon = "warning")
@@ -31,27 +31,54 @@ def level_static():
     endarea = canvas.create_rectangle(1760, 150, 1900, 930, fill="palegreen1", width=0)
     canvas.tag_lower(endarea)
 
+def mainlevel(init = False):
+    global bossmode, cheaton, collision, currentlevel, initialrun, isgameover, islevelover, obstacle, obstaclecoords, obstacledirection,obstaclecount, obstaclespeed, pause, playercoords
+    if currentlevel == 1:
+        speed = 1
+        colour = "blue"
+    elif currentlevel == 2:
+        speed = 2
+        colour = "green"
+    elif currentlevel == 3:
+        speed = 3
+        colour = "black"
 
-def level_one():
-    global pause, obstaclecoords, obstacledirection, obstaclespeed, initialrun, obstaclelength
-    
-    if initialrun == True:
+
+    if init == True:
+        try:
+            gameoverbutton.destroy()
+            savegamebutton.destroy()
+            canvas.delete(pausetext, player)
+            for i in range(len(obstacle)):
+                canvas.delete(obstacle[i])
+        except:
+            pass
+        playerconfig(50, 540, 130, 630)
+        obstacle = []
+        obstacledirection = []
+        obstaclespeed = []
+        obstaclecoords = [(),(),(),(),()]
+        pause = False
+        islevelover = False
+
         x = 300
         y = 300
-        obstaclelength = len(obstaclecoords)
-        for i in range(obstaclelength):
-            obstacle.append(canvas.create_oval(x+i*y, x+i*y, x+100+i*y, x+100+i*y, fill="blue", width=5))
-            obstaclespeed.append(random.randint(1,2))
+        obstaclecount = len(obstaclecoords)
+        for i in range(obstaclecount):
+            obstacle.append(canvas.create_oval(x+i*y, x+i*y, x+100+i*y, x+100+i*y, fill=colour, width=5))
+            obstaclespeed.append(random.randint(speed,speed+1))
 
-    for j in range(obstaclelength):
+    for j in range(obstaclecount):
         obstaclecoords[j] = canvas.coords(obstacle[j])
     
-    if initialrun == True:
-        for y in range(obstaclelength):
+    if init == True and isgameover == False:
+        for y in range(obstaclecount):
             obstacledirection.append(False)
+        initialrun = False
         collisiondetection()
         borderdetection()
-        initialrun = False
+        nextlevel()
+        scorecounter()
 
     for k in range(len(obstacle)):
         if obstaclecoords[k][3] >= 930: obstacledirection[k] = True
@@ -59,19 +86,30 @@ def level_one():
         if obstacledirection[k] == True: canvas.move(obstacle[k], 0, -obstaclespeed[k])
         else: canvas.move(obstacle[k], 0, obstaclespeed[k])
     
-    if pause == False:
-        window.after(2, level_one)
+    if pause == False and islevelover ==False:
+        window.after(2, lambda: mainlevel())
 
-def playerconfig():
+def scorecounter():
+    global score, scoretext
+    try:
+        canvas.delete(scoretext)
+    except:
+        pass
+    if pause != True:
+        scoretext = canvas.create_text(960, 50, text="Score: "+ str(score), font=("Helvetica", 40), fill="white")
+        score -=1
+        window.after(1000, scorecounter)
+
+def playerconfig(x1 = 50, y1 = 540, x2 = 130, y2 = 630):
     global player
-    player = canvas.create_rectangle(50, 540, 130, 620, fill="red", width=5)
+    player = canvas.create_rectangle(x1, y1, x2, y2, fill="red", width=5)
     window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
     window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
     window.bind(upkey, lambda x: canvas.move(player, 0, -10))
     window.bind(downkey, lambda x: canvas.move(player, 0, 10))
 
 def welcomepage():
-    global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext
+    global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext, loadbutton
     canvas.configure(bg="black")
 
     startbutton = Button(canvas, text="Start", font=("Helvetica", 20), command=startgame)
@@ -79,23 +117,31 @@ def welcomepage():
     
     leaderbutton = Button(canvas, text="View leaderboard", font=("Helvetica", 20), command=leaderboard)
     leaderbutton.place(x=960, y=700, anchor=CENTER)
+
+    loadbutton = Button(canvas, text="Load save", font=("Helvetica", 20), command=loadsave)
+    loadbutton.place(x=960, y=800, anchor=CENTER)
     
     titletext = canvas.create_text(960, 300, text="The Impossible Game", font=("Helvetica", 30), fill="white")
     welcometext = canvas.create_text(960, 450, text="Welcome!", font=("Helvetica", 80), fill="white")
-    esctext = canvas.create_text(960, 800, text="Press esc to quit at anytime", font=("Helvetica", 10), fill="white")
-    pausetext = canvas.create_text(960, 850, text="Press p to toggle pause at anytime", font=("Helvetica", 10), fill="white")
-    cheattext = canvas.create_text(960, 900, text="Press x to toggle work mode (boss key) anytime", font=("Helvetica", 10), fill="white")
+    esctext = canvas.create_text(960, 850, text="Press esc to quit at anytime", font=("Helvetica", 10), fill="white")
+    pausetext = canvas.create_text(960, 900, text="Press p to toggle pause at anytime", font=("Helvetica", 10), fill="white")
+    cheattext = canvas.create_text(960, 950, text="Press x to toggle work mode (boss key) anytime", font=("Helvetica", 10), fill="white")
 
 def startgame():
     screenclear()
     canvas.configure(bg="white")
-    playerconfig()
     level_static()
-    level_one()
+    mainlevel(True)
 
 def screenclear():
     leaderbutton.destroy()
     startbutton.destroy()
+    loadbutton.destroy()
+    try:
+        savegamebutton.destroy()
+        saveprogressbutton.destroy()
+    except:
+        pass
     canvas.delete(welcometext, titletext, esctext, pausetext, cheattext)
 
 def leaderboard():
@@ -119,7 +165,7 @@ def deleteleaderpage():
     welcomepage()
     
 def pausegame(inputtext):
-    global pause, pausetext, initialrun, currentlevel
+    global pause, pausetext, initialrun, currentlevel, finalscore
     if initialrun != True:
         pause = not pause
         if pause == True:
@@ -128,30 +174,31 @@ def pausegame(inputtext):
             window.unbind(upkey)
             window.unbind(rightkey)
             window.unbind(downkey)
+            if "beat" in inputtext:
+                finalscore = score
         else:
             canvas.delete(pausetext)
             window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
             window.bind(upkey, lambda x: canvas.move(player, 0, -10))
             window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
             window.bind(downkey, lambda x: canvas.move(player, 0, 10))
-            if currentlevel == 1:
-                level_one()
+            scorecounter()
+            mainlevel()
 
 def restartgame():
      screenclear()
      gameoverbutton.destroy()
-     savestatsbutton.destroy()
-     canvas.delete(player, endarea)
+     canvas.delete(player, endarea, scoretext)
      for i in range(len(obstacle)):
          canvas.delete(obstacle[i])
      initialize()
      welcomepage()
 
 def updateleaderboard():
-    global statsbox, nameprompt, score
-    savestatsbutton.destroy()
+    global statsbox, nameprompt, finalscore
     username = nameprompt.get()
     statsbox.destroy()
+    saveprogressbutton.destroy()
     scorelist = []
     with open("leaderboard.txt") as file:
         leaderboardlines = file.readlines()
@@ -164,14 +211,14 @@ def updateleaderboard():
 
     insertindex = len(scorelist) + 1
     for i in range(len(scorelist)):
-        if int(scorelist[i]) <= score:
+        if int(scorelist[i]) <= finalscore:
             insertindex = i
     
     with open("leaderboard.txt", "w+") as file:
         for i, line in enumerate(leaderboardlines):     
             if i == insertindex:      
                 file.writelines(line + "\n")               
-                file.writelines(username + "," + str(score))
+                file.writelines(username + "," + str(finalscore))
             else:
                 file.writelines(line)
     
@@ -183,17 +230,17 @@ def updateleaderboard():
                 file.writelines(line)
 
 def collisiondetection():
-    global gameoverbutton, savestatsbutton, isgameover, cheaton, collision, obstaclecoords, playercoords
+    global gameoverbutton, isgameover, cheaton, collision, obstaclecoords, playercoords, islevelover, scoretext, finalscore, score
     playercoords = canvas.coords(player)
     collision = canvas.find_overlapping(playercoords[0], playercoords[1], playercoords[2], playercoords[3])
-    if len(collision) == 2 and cheaton == False:
+    if len(collision) == 2 and cheaton == False and islevelover == False and isgameover == False:
         isgameover = True
         pausegame("Game Over!")
         gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
         gameoverbutton.place(x=960, y=600, anchor=CENTER)
-        savestatsbutton = Button(canvas, text="Save stats", font=("Helvetica", 20), command=savestats)
-        savestatsbutton.place(x=960, y=700, anchor=CENTER)
         window.unbind("p")
+        scoretext = canvas.create_text(960, 50, text="Score: "+ str(score), font=("Helvetica", 40), fill="white")
+        score = 200
 
     if isgameover == False:
         window.after(2, collisiondetection)    
@@ -231,16 +278,11 @@ def bosskey():
         workphotolabel.image = workphoto
 
 def initialize():
-    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score, isgameover, cheaton
+    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, loadedfromsave, isgameover, islevelover, cheaton
     currentlevel = 1
-    score = 0
-    obstacle = []
-    obstacledirection = []
-    obstaclespeed = []
-    obstaclecoords = [(),(),(),(),()]
     initialrun = True
-    pause = False
     cheaton = False
+    loadedfromsave = False
     isgameover = False
     bossmode = False
     window.bind("<Escape>", lambda x: quitgame())
@@ -310,6 +352,56 @@ def configureuserkeys():
         messagebox.showerror("Invalid input", "They can't be the same!", icon = "error")
         keyprompt()
     window.lift()
+
+def nextlevel():
+    global saveprogressbutton, gameoverbutton, currentlevel, islevelover, pause, initialrun, savegamebutton
+    playercoords = canvas.coords(player)
+    if playercoords[2] >= 1760:
+        islevelover = True
+        if currentlevel == 1:
+            currentlevel +=1
+            pausegame("You completed level 1!")
+            gameoverbutton = Button(canvas, text="Level 2", font=("Helvetica", 20), command=lambda: mainlevel(True))
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            savegamebutton = Button(canvas, text="Save game", font=("Helvetica", 20), command=savegame)
+            savegamebutton.place(x=960, y=700, anchor=CENTER)
+        elif currentlevel == 2:
+            currentlevel +=1
+            pausegame("You completed level 2!")
+            gameoverbutton = Button(canvas, text="Level 3", font=("Helvetica", 20), command=lambda: mainlevel(True))
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            savegamebutton = Button(canvas, text="Save game", font=("Helvetica", 20), command=savegame)
+            savegamebutton.place(x=960, y=700, anchor=CENTER)
+        else:
+            pausegame("You beat the impossible game!")
+            gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            saveprogressbutton = Button(canvas, text="Save score", font=("Helvetica", 20), command=savestats)
+            saveprogressbutton.place(x=960, y=700, anchor=CENTER)
+            
+        window.unbind("p")
+
+    if islevelover == False:
+        window.after(2, nextlevel)   
+
+def savegame():
+    global playercoords, currentlevel, score
+    playercoords = canvas.coords(player)
+    with open("playerprogress.txt", "w+") as file:
+        file.writelines(str(currentlevel)+"\n")
+        file.writelines(str(score))
+    savegamebutton.destroy()
+
+def loadsave():
+    global playercoords, currentlevel, loadedfromsave, score
+    loadedfromsave = True
+    with open("playerprogress.txt") as file:
+        currentlevel = int(file.readline()) + 1
+        score = int(file.readline())
+        
+
+global score
+score = 200
 
 windowconfig()
 initialize()
