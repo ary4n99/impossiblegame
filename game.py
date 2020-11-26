@@ -1,4 +1,4 @@
-from tkinter import Tk, Canvas, Label, Button, messagebox, CENTER, PhotoImage
+from tkinter import Tk, Canvas, Label, Button, messagebox, CENTER, PhotoImage, Entry
 import sys
 
 def quitgame():
@@ -75,7 +75,7 @@ def welcomepage():
     welcometext = canvas.create_text(960, 450, text="Welcome!", font=("Helvetica", 80), fill="white")
     esctext = canvas.create_text(960, 800, text="Press esc to quit at anytime", font=("Helvetica", 10), fill="white")
     pausetext = canvas.create_text(960, 850, text="Press p to toggle pause at anytime", font=("Helvetica", 10), fill="white")
-    cheattext = canvas.create_text(960, 950, text="Press x to toggle work mode (boss key) anytime", font=("Helvetica", 10), fill="white")
+    cheattext = canvas.create_text(960, 900, text="Press x to toggle work mode (boss key) anytime", font=("Helvetica", 10), fill="white")
 
 def startgame():
     screenclear()
@@ -126,20 +126,61 @@ def pausegame(input):
 def restartgame():
      screenclear()
      gameoverbutton.destroy()
+     savestatsbutton.destroy()
      canvas.delete(pausepopup, player, startarea, endarea)
      for i in range(len(obstacle)):
          canvas.delete(obstacle[i])
      initialize()
      welcomepage()
 
+def savestats():
+    global statsbox, nameprompt
+    statsbox = Tk()
+    statsbox.title("Please enter your name:")
+    nameprompt = Entry(statsbox, width=50)
+    nameprompt.pack()
+    namebutton = Button(statsbox, text="Save stats to leaderboard", command=updateleaderboard)
+    namebutton.pack()
+
+def updateleaderboard():
+    global statsbox, nameprompt, score
+    savestatsbutton.destroy()
+    username = nameprompt.get()
+    statsbox.destroy()
+    scorelist = []
+    with open("leaderboard.txt") as file:
+        leaderboardlines = file.readlines()
+        leaderboard = [line.strip() for line in file]
+    
+    for i in range(len(leaderboard)):
+        leadersplit = leaderboard[i].split(",")
+        scorelist.append(leadersplit[1])
+    
+    insertindex = len(scorelist) + 1
+    for i in range(len(scorelist)):
+        if scorelist[i] <= score:
+            insertindex = i
+    
+    with open("leaderboard.txt", "w+") as file:
+        for i, line in enumerate(leaderboardlines):     
+            if i == insertindex:      
+                file.writelines(line + "\n")               
+                file.writelines(username + "," + str(score))
+            else:
+                file.writelines(line)
+            print(line)
+
+
 def collisiondetection():
-    global gameoverbutton
+    global gameoverbutton, savestatsbutton
     collision[0] = canvas.find_overlapping(obstaclecoords[0][0], obstaclecoords[0][1], obstaclecoords[0][2], obstaclecoords[0][3])
     for i in range(len(collision)):
         if len(collision[i]) == 2:
             pausegame("Game Over!")
-            gameoverbutton = Button(canvas, text="Restart", font=("Helvetica", 20), command=restartgame)
+            gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
             gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            savestatsbutton = Button(canvas, text="Save stats", font=("Helvetica", 20), command=savestats)
+            savestatsbutton.place(x=960, y=700, anchor=CENTER)
         else:
             window.after(2, collisiondetection)    
 
@@ -155,8 +196,9 @@ def bosskey():
 
 
 def initialize():
-    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode
+    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score
     currentlevel = 1
+    score = 0
     obstacle = []
     obstacledirection = []
     obstaclespeed = []
