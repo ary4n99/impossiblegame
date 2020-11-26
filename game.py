@@ -1,6 +1,9 @@
 from tkinter import Tk, Canvas, Label, Button, messagebox, CENTER, PhotoImage, Entry
 import sys
 
+#RESOLUTION: 1920x1080
+#CHEATKEY: c
+
 def quitgame():
     quitbox = messagebox.askquestion("Quit", "Are you sure you want to quit?", icon = "warning")
     if quitbox == 'yes':
@@ -63,7 +66,7 @@ def playerconfig():
 def welcomepage():
     global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext
     canvas.configure(bg="black")
-    
+
     startbutton = Button(canvas, text="Start", font=("Helvetica", 20), command=startgame)
     startbutton.place(x=960, y=600, anchor=CENTER)
     
@@ -167,10 +170,10 @@ def updateleaderboard():
                 file.writelines(line)
 
 def collisiondetection():
-    global gameoverbutton, savestatsbutton, isgameover
+    global gameoverbutton, savestatsbutton, isgameover, cheaton
     collision[0] = canvas.find_overlapping(obstaclecoords[0][0], obstaclecoords[0][1], obstaclecoords[0][2], obstaclecoords[0][3])
     for i in range(len(collision)):
-        if len(collision[i]) == 2:
+        if len(collision[i]) == 2 and cheaton == False:
             isgameover = True
             pausegame("Game Over!")
             gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command=restartgame)
@@ -217,11 +220,7 @@ def bosskey():
         workphotolabel.image = workphoto
 
 def initialize():
-    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score, isgameover, upkey, downkey, leftkey, rightkey
-    upkey = "w"
-    downkey = "s"
-    leftkey = "a"
-    rightkey = "d"
+    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score, isgameover, cheaton
     currentlevel = 1
     score = 0
     obstacle = []
@@ -231,10 +230,21 @@ def initialize():
     collision= [()]
     initialrun = True
     pause = False
+    cheaton = False
     bossmode = False
-    window.bind('<Escape>', lambda x: quitgame())
+    window.bind("<Escape>", lambda x: quitgame())
     window.bind("p", lambda x: pausegame("Paused"))
+    window.bind("<KeyPress-c>", lambda x: cheatmodeon())
+    window.bind("<KeyRelease-c>", lambda x: cheatmodeoff())
     window.bind("x", lambda x: bosskey())
+
+def cheatmodeon():
+    global cheaton
+    cheaton = True
+
+def cheatmodeoff():
+    global cheaton
+    cheaton = False
 
 def savestats():
     global statsbox, nameprompt
@@ -251,18 +261,19 @@ def donothing():
 def keyprompt():
     global keypromptbox, upprompt, downprompt, leftprompt, rightprompt
     keypromptbox = Tk()
-    keypromptbox.title("Close to keep defaults (WASD)")
+    keypromptbox.title("Enter player control keys:")
     keypromptbox.attributes('-topmost', True)
+    keypromptbox.protocol("WM_DELETE_WINDOW", donothing)
     keypromptbox.geometry("+%d+%d" % (500, 500))
     upprompt = Entry(keypromptbox, width=75)
     upprompt.insert(0, "UP (remove this text)")
     upprompt.pack()
-    downprompt = Entry(keypromptbox, width=75)
-    downprompt.insert(0, "DOWN (remove this text)")
-    downprompt.pack()
     leftprompt = Entry(keypromptbox, width=75)
     leftprompt.insert(0, "LEFT (remove this text)")
     leftprompt.pack()
+    downprompt = Entry(keypromptbox, width=75)
+    downprompt.insert(0, "DOWN (remove this text)")
+    downprompt.pack()
     rightprompt = Entry(keypromptbox, width=75)
     rightprompt.insert(0, "RIGHT (remove this text)")
     rightprompt.pack()
@@ -277,20 +288,17 @@ def configureuserkeys():
     leftkey = leftprompt.get()
     rightkey = rightprompt.get()
     keypromptbox.destroy()
+
     if len(upkey) != 1 or len(downkey) != 1 or len(leftkey) != 1 or len(rightkey) != 1 or upkey.isalpha() == False or downkey.isalpha() == False or leftkey.isalpha() == False or rightkey.isalpha() == False:
         messagebox.showerror("Invalid input", "Please enter 1 alphabetical character for each prompt.", icon = "error")
-        upkey = "w"
-        downkey = "s"
-        leftkey = "a"
-        rightkey = "d"
         keyprompt()
-    if upkey == "p" or downkey == "p" or leftkey == "p" or rightkey == "p" or upkey == "x" or downkey == "x" or leftkey == "x" or rightkey == "x":
+    if upkey == "p" or downkey == "p" or leftkey == "p" or rightkey == "p" or upkey == "x" or downkey == "x" or leftkey == "x" or rightkey == "x" or upkey == "c" or downkey == "c" or leftkey == "c" or rightkey == "c":
         messagebox.showerror("Invalid input", "These are protected keys, please choose others.", icon = "error")
-        upkey = "w"
-        downkey = "s"
-        leftkey = "a"
-        rightkey = "d"
         keyprompt()
+    if upkey == downkey or upkey == leftkey or upkey == rightkey or downkey == leftkey or downkey == rightkey or leftkey == rightkey:
+        messagebox.showerror("Invalid input", "They can't be the same!", icon = "error")
+        keyprompt()
+    window.lift()
 
 windowconfig()
 initialize()
