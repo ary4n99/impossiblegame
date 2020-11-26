@@ -55,10 +55,10 @@ def level_one():
 def playerconfig():
     global player
     player = canvas.create_rectangle(50, 540, 130, 620, fill="red", width=5)
-    window.bind("a", lambda x: canvas.move(player, -10, 0))
-    window.bind("d", lambda x: canvas.move(player, 10, 0))
-    window.bind("w", lambda x: canvas.move(player, 0, -10))
-    window.bind("s", lambda x: canvas.move(player, 0, 10))
+    window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
+    window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
+    window.bind(upkey, lambda x: canvas.move(player, 0, -10))
+    window.bind(downkey, lambda x: canvas.move(player, 0, 10))
 
 def welcomepage():
     global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext
@@ -131,15 +131,6 @@ def restartgame():
      initialize()
      welcomepage()
 
-def savestats():
-    global statsbox, nameprompt
-    statsbox = Tk()
-    statsbox.title("Please enter your name:")
-    nameprompt = Entry(statsbox, width=50)
-    nameprompt.pack()
-    namebutton = Button(statsbox, text="Save stats to leaderboard", command=updateleaderboard)
-    namebutton.pack()
-
 def updateleaderboard():
     global statsbox, nameprompt, score
     savestatsbutton.destroy()
@@ -187,10 +178,10 @@ def collisiondetection():
             savestatsbutton = Button(canvas, text="Save stats", font=("Helvetica", 20), command=savestats)
             savestatsbutton.place(x=960, y=700, anchor=CENTER)
             window.unbind("p")
-            window.unbind("s")  
-            window.unbind("w")
-            window.unbind("a")
-            window.unbind("d")      
+            window.unbind(downkey)  
+            window.unbind(upkey)
+            window.unbind(leftkey)
+            window.unbind(rightkey)      
         else:
             window.after(2, collisiondetection)    
 
@@ -198,21 +189,21 @@ def borderdetection():
     playercoords = canvas.coords(player)
     if pause == False:
         if playercoords[0] <= 20:
-            window.unbind("a")
+            window.unbind(leftkey)
         else:
-            window.bind("a", lambda x: canvas.move(player, -10, 0))
+            window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
         if playercoords[1] <= 150:
-            window.unbind("w")
+            window.unbind(upkey)
         else:
-            window.bind("w", lambda x: canvas.move(player, 0, -10))
+            window.bind(upkey, lambda x: canvas.move(player, 0, -10))
         if playercoords[2] >= 1900:
-            window.unbind("d")
+            window.unbind(rightkey)
         else:
-            window.bind("d", lambda x: canvas.move(player, 10, 0))
+            window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
         if playercoords[3] >= 930:
-            window.unbind("s")    
+            window.unbind(downkey)    
         else:
-            window.bind("s", lambda x: canvas.move(player, 0, 10))
+            window.bind(downkey, lambda x: canvas.move(player, 0, 10))
         window.after(2, borderdetection)  
     
 def bosskey():
@@ -226,7 +217,11 @@ def bosskey():
         workphotolabel.image = workphoto
 
 def initialize():
-    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score, isgameover
+    global currentlevel, obstacle, obstacledirection, obstaclespeed, obstaclecoords, collision, initialrun, pause, bossmode, score, isgameover, upkey, downkey, leftkey, rightkey
+    upkey = "w"
+    downkey = "s"
+    leftkey = "a"
+    rightkey = "d"
     currentlevel = 1
     score = 0
     obstacle = []
@@ -241,8 +236,65 @@ def initialize():
     window.bind("p", lambda x: pausegame("Paused"))
     window.bind("x", lambda x: bosskey())
 
+def savestats():
+    global statsbox, nameprompt
+    statsbox = Tk()
+    statsbox.title("Please enter your name:")
+    nameprompt = Entry(statsbox, width=50)
+    nameprompt.pack()
+    namebutton = Button(statsbox, text="Save stats to leaderboard", command=updateleaderboard)
+    namebutton.pack()
+
+def donothing():
+    pass
+
+def keyprompt():
+    global keypromptbox, upprompt, downprompt, leftprompt, rightprompt
+    keypromptbox = Tk()
+    keypromptbox.title("Close to keep defaults (WASD)")
+    keypromptbox.attributes('-topmost', True)
+    keypromptbox.geometry("+%d+%d" % (500, 500))
+    upprompt = Entry(keypromptbox, width=75)
+    upprompt.insert(0, "UP (remove this text)")
+    upprompt.pack()
+    downprompt = Entry(keypromptbox, width=75)
+    downprompt.insert(0, "DOWN (remove this text)")
+    downprompt.pack()
+    leftprompt = Entry(keypromptbox, width=75)
+    leftprompt.insert(0, "LEFT (remove this text)")
+    leftprompt.pack()
+    rightprompt = Entry(keypromptbox, width=75)
+    rightprompt.insert(0, "RIGHT (remove this text)")
+    rightprompt.pack()
+    
+    submitkeybutton = Button(keypromptbox, text="Submit", command=configureuserkeys)
+    submitkeybutton.pack()
+
+def configureuserkeys():
+    global keypromptbox, upprompt, downprompt, leftprompt, rightprompt, upkey, downkey, leftkey, rightkey
+    upkey = upprompt.get()
+    downkey = downprompt.get()
+    leftkey = leftprompt.get()
+    rightkey = rightprompt.get()
+    keypromptbox.destroy()
+    if len(upkey) != 1 or len(downkey) != 1 or len(leftkey) != 1 or len(rightkey) != 1 or upkey.isalpha() == False or downkey.isalpha() == False or leftkey.isalpha() == False or rightkey.isalpha() == False:
+        messagebox.showerror("Invalid input", "Please enter 1 alphabetical character for each prompt.", icon = "error")
+        upkey = "w"
+        downkey = "s"
+        leftkey = "a"
+        rightkey = "d"
+        keyprompt()
+    if upkey == "p" or downkey == "p" or leftkey == "p" or rightkey == "p" or upkey == "x" or downkey == "x" or leftkey == "x" or rightkey == "x":
+        messagebox.showerror("Invalid input", "These are protected keys, please choose others.", icon = "error")
+        upkey = "w"
+        downkey = "s"
+        leftkey = "a"
+        rightkey = "d"
+        keyprompt()
+
 windowconfig()
 initialize()
 welcomepage()
+keyprompt()
 
 window.mainloop()
