@@ -20,10 +20,10 @@ def windowconfig():
     canvas = Canvas(window, width = 1920, height = 1080)
     canvas.pack()
     
-    workphoto = PhotoImage(file="ss.gif")
+    workphoto = PhotoImage(file="work.gif")
     workphotolabel = Label(image = workphoto)
     workphotolabel.image = workphoto
-
+    
 def level_static():
     global obstacle, endarea
     
@@ -135,7 +135,7 @@ def playerconfig(x1 = 50, y1 = 540, x2 = 130, y2 = 630):
     window.bind(downkey, lambda x: canvas.move(player, 0, 10))
 
 def welcomepage():
-    global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext, loadbutton
+    global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext, loadbutton, smileyphotolabel
     canvas.configure(bg="black")
 
     startbutton = Button(canvas, text="Start", font=("Helvetica", 20), command = startgame)
@@ -152,6 +152,11 @@ def welcomepage():
     esctext = canvas.create_text(960, 900, text="Press esc to quit at anytime", font=("Helvetica", 10), fill="white")
     pausetext = canvas.create_text(960, 950, text="Press p to toggle pause at anytime", font=("Helvetica", 10), fill="white")
     cheattext = canvas.create_text(960, 1000, text="Press x to toggle work mode (boss key) anytime", font=("Helvetica", 10), fill="white")
+    
+    smileyphoto = PhotoImage(file="smiley.gif")
+    smileyphotolabel = Label(image = smileyphoto, borderwidth = 0)
+    smileyphotolabel.image = smileyphoto
+    smileyphotolabel.place(x=50, y=50)
 
 def startgame():
     screenclear()
@@ -163,7 +168,7 @@ def screenclear():
     leaderbutton.destroy()
     startbutton.destroy()
     loadbutton.destroy()
-    
+    smileyphotolabel.destroy()
     try:
         savegamebutton.destroy()
         saveprogressbutton.destroy()

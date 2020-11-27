@@ -1,8 +1,3 @@
 Aryan Agrawal,100
 John Doe,90
 Jane Martin,80
-Bob Smith,70
-Billy Johnson,60
-Sam Howard,50
-Maria Jenkins,40
-Connor Stephenson,30
