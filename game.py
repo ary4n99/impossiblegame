@@ -1,4 +1,4 @@
-from tkinter import Tk, Canvas, Label, Button, messagebox, CENTER, PhotoImage, Entry
+from tkinter import CENTER, Tk, Canvas, Label, Button, PhotoImage, Entry, messagebox
 import sys, random
 
 #RESOLUTION: 1920x1080
@@ -48,10 +48,10 @@ def mainlevel(init = False):
         colour = "blue"
     elif currentlevel == 3:
         speed = 12
-        colour = "red"
+        colour = "black"
     elif currentlevel == 4:
         speed = 14
-        colour = "black"
+        colour = "red"
 
 
     if init == True:
@@ -67,7 +67,7 @@ def mainlevel(init = False):
         except:
             pass
         
-        playerconfig(50, 540, 130, 630)
+        playerconfig(50, 540, 150, 640)
         window.bind("p", lambda x: pausegame("Paused"))
         pause = False
         islevelover = False
@@ -81,7 +81,10 @@ def mainlevel(init = False):
         obstaclecount = len(obstaclecoords)
 
         for i in range(obstaclecount):
-            obstacle.append(canvas.create_oval(x + i * y, x + i * y, x + 100 + i * y, x + 100 + i * y, fill = colour, width = 5))
+            if currentlevel == 1 or currentlevel == 2:
+                obstacle.append(canvas.create_oval(x + i * y, x + i * y, x + 100 + i * y, x + 100 + i * y, fill = colour, width = 5))
+            else: 
+                obstacle.append(canvas.create_rectangle(x + i * y, x + i * y, x + 100 + i * y, x + 100 + i * y, fill = colour, width = 5))
             obstaclespeed.append(random.randint(speed, speed + 1))
 
     for j in range(obstaclecount):
@@ -125,7 +128,7 @@ def scorecounter():
         
         window.after(1000, scorecounter)
 
-def playerconfig(x1 = 50, y1 = 540, x2 = 130, y2 = 630):
+def playerconfig(x1 = 50, y1 = 540, x2 = 150, y2 = 640):
     global player
     
     player = canvas.create_rectangle(x1, y1, x2, y2, fill="red", width = 5)
@@ -186,7 +189,7 @@ def leaderboard():
     screenclear()
     leadertext = []
     
-    for i in range(len(leaderboard)):
+    for i in range(8):
         leadersplit = leaderboard[i].split(",")
         leadertext.append(canvas.create_text(660, i*100+100, text = str(i+1) + ". "+ leadersplit[0], font=("Helvetica", 30), fill="white"))
         leadertext.append(canvas.create_text(1260, i*100+100, text = "Score: "+ leadersplit[1], font=("Helvetica", 30), fill="white"))
@@ -264,32 +267,25 @@ def updateleaderboard():
     
     with open("leaderboard.txt") as file:
         leaderboard = [line.strip() for line in file]
-    
+    print(leaderboard)
     for i in range(len(leaderboard)):
         leadersplit = leaderboard[i].split(",")
         scorelist.append(leadersplit[1])
-    
+    print(scorelist)
     insertindex = len(scorelist) + 1
-    
+    print(finalscore)
     for i in range(len(scorelist)):
         if int(scorelist[i]) <= finalscore:
             insertindex = i
             break
-    
-    with open("leaderboard.txt", "w+") as file:
-        for i in range(len(leaderboard)):
-            if i == insertindex:
-                file.write(leaderboard[i] + "\n")
-                file.write(username + "," + str(finalscore)+"\n")
-            else:
-                file.write(leaderboard[i]+"\n")
-    
+    print(insertindex)
     with open("leaderboard.txt", "w") as file:
         for i in range(len(leaderboard)):
-            if i >=8:
-                file.write("") 
+            if i == insertindex:
+                file.write(username + "," + str(finalscore) + "\n")
+                file.write(leaderboard[i] + "\n")
             else:
-                file.writelines(leaderboard[i]+"\n")
+                file.write(leaderboard[i] + "\n")
 
 def collisiondetection():
     global gameoverbutton, isgameover, cheaton, collision, obstaclecoords, playercoords, islevelover, scoretext, finalscore, score

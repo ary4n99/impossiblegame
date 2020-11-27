@@ -1,3 +1,8 @@
 Aryan Agrawal,100
 John Doe,90
 Jane Martin,80
+Aryan Agrawal,70
+John Doe,60
+Jane Martin,50
+Aryan Agrawal,40
+John Doe,30
