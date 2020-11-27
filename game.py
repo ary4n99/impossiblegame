@@ -352,6 +352,7 @@ def bosskey(): # toggles google docs image when "x" is pressed, making it look l
     
     if bossmode == True:
         workphotolabel.place(x = -2, y = -2)
+        smileyphotolabel.destroy()
     else:
         workphotolabel.destroy()
         workphotolabel = Label(image = workphoto)
