@@ -34,7 +34,7 @@ def level_static():
     canvas.create_rectangle(0, 0, 20, 1080, fill = bordercolour, width = 0)
     canvas.create_rectangle(1900, 0, 1920, 1080, fill = bordercolour, width = 0)
     
-    endarea = canvas.create_rectangle(1760, 150, 1900, 930, fill="palegreen1", width = 0)
+    endarea = canvas.create_rectangle(1760, 150, 1900, 930, fill = "palegreen1", width = 0)
     canvas.tag_lower(endarea)
 
 def mainlevel(init = False):
@@ -85,7 +85,7 @@ def mainlevel(init = False):
                 obstacle.append(canvas.create_oval(x + i * y, x + i * y, x + 100 + i * y, x + 100 + i * y, fill = colour, width = 5))
             else: 
                 obstacle.append(canvas.create_rectangle(x + i * y, x + i * y, x + 100 + i * y, x + 100 + i * y, fill = colour, width = 5))
-            obstaclespeed.append(random.randint(speed, speed + 1))
+            obstaclespeed.append(random.randint(speed - 1, speed + 1))
 
     for j in range(obstaclecount):
         obstaclecoords[j] = canvas.coords(obstacle[j])
@@ -111,7 +111,7 @@ def mainlevel(init = False):
         else: 
             canvas.move(obstacle[k], 0, obstaclespeed[k])
     
-    if pause == False and islevelover ==False:
+    if pause == False and islevelover == False:
         window.after(5, mainlevel)
 
 def scorecounter():
@@ -122,16 +122,16 @@ def scorecounter():
         pass
     
     if pause != True and islevelover == False:
-        scoretext = canvas.create_text(960, 75, text="Score: "+ str(score), font=("Helvetica", 40), fill="white")
+        scoretext = canvas.create_text(960, 75, text = "Score: " + str(score), font = ("Helvetica", 40), fill = "white")
         if score > 0:
-            score -=1
+            score -= 1
         
         window.after(1000, scorecounter)
 
 def playerconfig(x1 = 50, y1 = 540, x2 = 150, y2 = 640):
     global player
     
-    player = canvas.create_rectangle(x1, y1, x2, y2, fill="red", width = 5)
+    player = canvas.create_rectangle(x1, y1, x2, y2, fill = "red", width = 5)
     window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
     window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
     window.bind(upkey, lambda x: canvas.move(player, 0, -10))
@@ -139,7 +139,7 @@ def playerconfig(x1 = 50, y1 = 540, x2 = 150, y2 = 640):
 
 def welcomepage():
     global startbutton, leaderbutton, welcometext, esctext, titletext, pausetext, cheattext, loadbutton, smileyphotolabel
-    canvas.configure(bg="black")
+    canvas.configure(bg = "black")
 
     startbutton = Button(canvas, text="Start", font=("Helvetica", 20), command = startgame)
     startbutton.place(x = 960, y = 600, anchor = CENTER)
@@ -150,20 +150,20 @@ def welcomepage():
     loadbutton = Button(canvas, text="Load save", font=("Helvetica", 20), command = loadsave)
     loadbutton.place(x = 960, y = 800, anchor = CENTER)
     
-    titletext = canvas.create_text(960, 300, text="The Impossible Game", font=("Helvetica", 30), fill="white")
-    welcometext = canvas.create_text(960, 450, text="Welcome!", font=("Helvetica", 80), fill="white")
-    esctext = canvas.create_text(960, 900, text="Press esc to quit at anytime", font=("Helvetica", 10), fill="white")
-    pausetext = canvas.create_text(960, 950, text="Press p to toggle pause at anytime", font=("Helvetica", 10), fill="white")
-    cheattext = canvas.create_text(960, 1000, text="Press x to toggle work mode (boss key) anytime", font=("Helvetica", 10), fill="white")
+    titletext = canvas.create_text(960, 300, text = "The Impossible Game", font = ("Helvetica", 30), fill = "white")
+    welcometext = canvas.create_text(960, 450, text = "Welcome!", font = ("Helvetica", 80), fill = "white")
+    esctext = canvas.create_text(960, 900, text = "Press esc to quit at anytime", font = ("Helvetica", 10), fill = "white")
+    pausetext = canvas.create_text(960, 950, text = "Press p to toggle pause at anytime", font = ("Helvetica", 10), fill = "white")
+    cheattext = canvas.create_text(960, 1000, text = "Press x to toggle work mode (boss key) anytime", font = ("Helvetica", 10), fill="white")
     
-    smileyphoto = PhotoImage(file="smiley.gif")
+    smileyphoto = PhotoImage(file = "smiley.gif")
     smileyphotolabel = Label(image = smileyphoto, borderwidth = 0)
     smileyphotolabel.image = smileyphoto
-    smileyphotolabel.place(x=50, y=50)
+    smileyphotolabel.place(x = 50, y = 50)
 
 def startgame():
     screenclear()
-    canvas.configure(bg="white")
+    canvas.configure(bg = "white")
     level_static()
     mainlevel(True)
 
@@ -191,8 +191,8 @@ def leaderboard():
     
     for i in range(8):
         leadersplit = leaderboard[i].split(",")
-        leadertext.append(canvas.create_text(660, i*100+100, text = str(i+1) + ". "+ leadersplit[0], font=("Helvetica", 30), fill="white"))
-        leadertext.append(canvas.create_text(1260, i*100+100, text = "Score: "+ leadersplit[1], font=("Helvetica", 30), fill="white"))
+        leadertext.append(canvas.create_text(660, i*100+100, text = str(i+1) + ". "+ leadersplit[0], font = ("Helvetica", 30), fill = "white"))
+        leadertext.append(canvas.create_text(1260, i*100+100, text = "Score: "+ leadersplit[1], font = ("Helvetica", 30), fill = "white"))
     
     gohomebutton = Button(canvas, text="Go home", font=("Helvetica", 20), command = deleteleaderpage)
     gohomebutton.place(x = 960, y = 1000, anchor = CENTER)
@@ -207,7 +207,7 @@ def deleteleaderpage():
 def displaytext(inputtext):
     global pause, pausetext, initialrun, currentlevel, finalscore
     
-    pausetext = canvas.create_text(960, 450, text = inputtext, font=("Helvetica", 80), fill="Black")
+    pausetext = canvas.create_text(960, 450, text = inputtext, font = ("Helvetica", 80), fill = "Black")
     window.unbind(leftkey)
     window.unbind(upkey)
     window.unbind(rightkey)
@@ -222,7 +222,7 @@ def pausegame(inputtext):
     if initialrun != True:
         pause = not pause
         if pause == True:
-            pausetext = canvas.create_text(960, 450, text = inputtext, font=("Helvetica", 80), fill="Black")
+            pausetext = canvas.create_text(960, 450, text = inputtext, font = ("Helvetica", 80), fill = "Black")
             window.unbind(leftkey)
             window.unbind(upkey)
             window.unbind(rightkey)
@@ -299,7 +299,7 @@ def collisiondetection():
     if len(collision) == 2 and cheaton == False and islevelover == False and isgameover == False:
         isgameover = True
         pausegame("Game Over!")
-        gameoverbutton = Button(canvas, text="Go home", font=("Helvetica", 20), command = restartgame)
+        gameoverbutton = Button(canvas, text = "Go home", font = ("Helvetica", 20), command = restartgame)
         gameoverbutton.place(x = 960, y = 600, anchor = CENTER)
         window.unbind("p")
         score = 200
@@ -340,7 +340,7 @@ def bosskey():
     bossmode = not bossmode
     
     if bossmode == True:
-        workphotolabel.place(x=-2, y=-2)
+        workphotolabel.place(x = -2, y = -2)
     else:
         workphotolabel.destroy()
         workphotolabel = Label(image = workphoto)
@@ -409,7 +409,7 @@ def keyprompt():
     rightprompt.insert(0, "RIGHT (remove this text)")
     rightprompt.pack()
     
-    submitkeybutton = Button(keypromptbox, text="Submit", command = configureuserkeys)
+    submitkeybutton = Button(keypromptbox, text = "Submit", command = configureuserkeys)
     submitkeybutton.pack()
 
 def configureuserkeys():
@@ -441,7 +441,7 @@ def nextlevel():
             islevelover = True
 
             if currentlevel == 1:
-                currentlevel +=1
+                currentlevel += 1
                 pausegame("You completed level 1!")
                 gameoverbutton = Button(canvas, text = "Level 2", font = ("Helvetica", 20), command = lambda: mainlevel(True))
                 gameoverbutton.place(x = 960, y = 600, anchor = CENTER)
@@ -505,7 +505,7 @@ def loadsave():
 
     loadbutton.destroy()
 
-global score
+# global score
 score = 200
 
 windowconfig()
