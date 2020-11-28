@@ -335,7 +335,7 @@ def borderdetection(): # stops user going out of bounds
                 window.unbind(rightkey)
             else:
                 window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
-            
+           
             if playercoords[3] >= 930:
                 window.unbind(downkey)
             else:
@@ -349,10 +349,13 @@ def bosskey(): # toggles google docs image when "x" is pressed, making it look l
     global bossmode, workphotolabel, workphoto
     
     bossmode = not bossmode
+    try:
+        smileyphotolabel.destroy()
+    except:
+        pass
     
     if bossmode == True:
         workphotolabel.place(x = -2, y = -2)
-        smileyphotolabel.destroy()
     else:
         workphotolabel.destroy()
         workphotolabel = Label(image = workphoto)
