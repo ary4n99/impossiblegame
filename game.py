@@ -3,11 +3,15 @@ import sys, random
 
 # RESOLUTION: 1920x1080 (YOU MUST SET THE OS SCREEN RESOLUTION TO THIS FOR THE GAME TO WORK PROPERLY)
 # CHEATKEY: hold c for invincibility
-# ADD SOURCE FOR PHOTO
+# https://creazilla.com/nodes/55045-ok-hand-emoji-clipart (SOURCE FOR PHOTO)
 
 def quitgame(): # configures quit popup to destroy window
-    if pause == False:
-        pausegame("Paused")
+    global pause
+    try:
+        if pause == False:
+            pausegame("Paused")
+    except:
+        pass
     quitbox = messagebox.askquestion("Quit", "Are you sure you want to quit?", icon = "warning")
     if quitbox == 'yes':
         window.destroy()
