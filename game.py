@@ -1,15 +1,21 @@
 from tkinter import CENTER, Tk, Canvas, Label, Button, PhotoImage, Entry, messagebox
 import sys, random
 
-# RESOLUTION: 1920x1080
-# CHEATKEY: hold c gor invincibility
+# RESOLUTION: 1920x1080 (YOU MUST SET THE OS SCREEN RESOLUTION TO THIS FOR THE GAME TO WORK PROPERLY)
+# CHEATKEY: hold c for invincibility
+# ADD SOURCE FOR PHOTO
 
 def quitgame(): # configures quit popup to destroy window
+    if pause == False:
+        pausegame("Paused")
     quitbox = messagebox.askquestion("Quit", "Are you sure you want to quit?", icon = "warning")
-    
     if quitbox == 'yes':
         window.destroy()
-
+        try:
+            keypromptbox.destroy()
+        except:
+            pass
+        
 def windowconfig(): # configures window and canvas geometry and attributes; initializes boss key photo
     global window, canvas, workphoto, workphotolabel
    
@@ -318,32 +324,31 @@ def borderdetection(): # stops user going out of bounds
     global playercoords
     
     playercoords = canvas.coords(player)
-    
-    if pause == False:
-        try: # checks coordinates and unbinds respective key to stop user going further; rebinds key if coordnates are not on the edge
-            if playercoords[0] <= 20:
-                window.unbind(leftkey)
-            else:
-                window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
-            
-            if playercoords[1] <= 150:
-                window.unbind(upkey)
-            else:
-                window.bind(upkey, lambda x: canvas.move(player, 0, -10))
-            
-            if playercoords[2] >= 1900:
-                window.unbind(rightkey)
-            else:
-                window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
-           
-            if playercoords[3] >= 930:
-                window.unbind(downkey)
-            else:
-                window.bind(downkey, lambda x: canvas.move(player, 0, 10))
-            
-            window.after(5, borderdetection)
-        except: 
-            pass
+
+    try: # checks coordinates and unbinds respective key to stop user going further; rebinds key if coordnates are not on the edge
+        if playercoords[0] <= 20:
+            window.unbind(leftkey)
+        elif isgameover != True:
+            window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
+        
+        if playercoords[1] <= 150:
+            window.unbind(upkey)
+        elif isgameover != True:
+            window.bind(upkey, lambda x: canvas.move(player, 0, -10))
+        
+        if playercoords[2] >= 1900:
+            window.unbind(rightkey)
+        elif isgameover != True:
+            window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
+        
+        if playercoords[3] >= 930:
+            window.unbind(downkey)
+        elif isgameover != True:
+            window.bind(downkey, lambda x: canvas.move(player, 0, 10))
+        
+        window.after(5, borderdetection)
+    except: 
+        pass
 
 def bosskey(): # toggles google docs image when "x" is pressed, making it look like work is being done
     global bossmode, workphotolabel, workphoto
