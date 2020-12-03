@@ -14,6 +14,7 @@ import os
 # https://iconscout.com/icon/microsoft-edge-4
 # GOOGLE DOCS SCREENSHOT
 
+
 # initializes variables before game is run/rerun
 def initialize():
     global currentlevel, obstacle, obstacledirection, obstaclespeed, \
@@ -118,9 +119,8 @@ def windowconfig():
 
     window = Tk()
     window.title("The Impossible Game - Aryan Agrawal")
-    window.iconphoto(False, PhotoImage(file = "smiley.gif"))
+    window.iconphoto(False, PhotoImage(file="smiley.gif"))
     window.geometry("1870x1030")
-    # window.attributes("-fullscreen", True)
 
     canvas = Canvas(window, width=1920, height=1080)
     canvas.pack()
@@ -647,17 +647,16 @@ def bosskey():
     smileyphotolabel.destroy()
     smileyphotolabel2.destroy()
 
-
     if bossmode is True:
         workphotolabel.place(x=-2, y=-2)
         window.title("Microsoft Edge - Google Docs")
-        window.iconphoto(False, PhotoImage(file = "edge.gif"))
+        window.iconphoto(False, PhotoImage(file="edge.gif"))
     else:
         workphotolabel.destroy()
         workphotolabel = Label(image=workphoto)
         workphotolabel.image = workphoto
         window.title("The Impossible Game - Aryan Agrawal")
-        window.iconphoto(False, PhotoImage(file = "smiley.gif"))
+        window.iconphoto(False, PhotoImage(file="smiley.gif"))
 
 
 def cheatmodeon():
@@ -700,6 +699,7 @@ def keyprompt():
     submitkeybutton = Button(keypromptbox, text="Submit",
                              command=configurekeys)
     submitkeybutton.pack()
+
 
 # verifies user entries for keyprompt popup
 def configurekeys():
