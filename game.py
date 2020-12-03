@@ -9,10 +9,13 @@ import os
 #
 # CHEATKEY: hold c for invincibility
 #
-# https://creazilla.com/nodes/55045-ok-hand-emoji-clipart (SOURCE FOR PHOTO)
+# (SOURCES FOR PHOTOS)
+# https://creazilla.com/nodes/55045-ok-hand-emoji-clipart
+# https://iconscout.com/icon/microsoft-edge-4
+# GOOGLE DOCS SCREENSHOT
 
-
-def initialize():  # initializes variables before game is run/rerun
+# initializes variables before game is run/rerun
+def initialize():
     global currentlevel, obstacle, obstacledirection, obstaclespeed, \
         obstaclecoords, collision, initialrun, pause, bossmode, \
         loadedfromsave, isgameover, is_level_over, cheaton, score, \
@@ -38,33 +41,51 @@ def initialize():  # initializes variables before game is run/rerun
 
 def welcomepage():
     global startbutton, leaderbutton, welcometext, esctext, titletext, \
-        pausetext, savetext, loadbutton, smileyphotolabel, cheattext
+        pausetext, savetext, loadbutton, smileyphotolabel, cheattext, \
+        keyconfigbutton, fullscreentext, smileyphotolabel2
 
-    canvas.configure(bg="black")  # creates black background
+    # creates black background
+    canvas.configure(bg="black")
 
     # creates buttons for homepage
-    startbutton = Button(canvas, text="Start",
+    startbutton = Button(canvas, text="Start game",
                          font=("Helvetica", 20),
                          command=startgame)
-    startbutton.place(x=960, y=600, anchor=CENTER)
+    startbutton.place(x=960, y=500, anchor=CENTER)
 
     leaderbutton = Button(canvas, text="View leaderboard",
                           font=("Helvetica", 20),
                           command=leaderboard)
-    leaderbutton.place(x=960, y=700, anchor=CENTER)
+    leaderbutton.place(x=960, y=600, anchor=CENTER)
 
     loadbutton = Button(canvas, text="Load save",
                         font=("Helvetica", 20),
                         command=loadsave)
-    loadbutton.place(x=960, y=800, anchor=CENTER)
+    loadbutton.place(x=960, y=700, anchor=CENTER)
+
+    keyconfigbutton = Button(canvas, text="Configure keys",
+                             font=("Helvetica", 20),
+                             command=keyprompt)
+    keyconfigbutton.place(x=960, y=800, anchor=CENTER)
 
     # creates text for homepage
-    titletext = canvas.create_text(960, 300, text="The Impossible Game",
+    fullscreentext = canvas.create_text(960, 100,
+                                        text="Set system display " +
+                                        "resolution to 1920x1080 " +
+                                        "and maximize for best " +
+                                        "gaming experience",
+                                        font=("Helvetica", 12),
+                                        fill="white")
+    titletext = canvas.create_text(960, 200, text="The Impossible Game",
                                    font=("Helvetica", 30),
                                    fill="white")
-    welcometext = canvas.create_text(960, 450, text="Welcome!",
+    welcometext = canvas.create_text(960, 350, text="Welcome!",
                                      font=("Helvetica", 80),
                                      fill="white")
+    cheattext = canvas.create_text(960, 862,
+                                   text="Hold c to disable collisions",
+                                   font=("Helvetica", 6),
+                                   fill="white")
     esctext = canvas.create_text(960, 900, text="Press esc to quit",
                                  font=("Helvetica", 10),
                                  fill="white")
@@ -79,25 +100,27 @@ def welcomepage():
                                   "leaderboard if you win!",
                                   font=("Helvetica", 10),
                                   fill="white")
-    cheattext = canvas.create_text(960, 862,
-                                   text="Hold c to disable collisions",
-                                   font=("Helvetica", 6),
-                                   fill="white")
 
     # creates photo for homepage
     smileyphoto = PhotoImage(file="smiley.gif")
     smileyphotolabel = Label(image=smileyphoto, borderwidth=0)
     smileyphotolabel.image = smileyphoto
     smileyphotolabel.place(x=50, y=50)
+    smileyphoto2 = PhotoImage(file="smiley.gif")
+    smileyphotolabel2 = Label(image=smileyphoto2, borderwidth=0)
+    smileyphotolabel2.image = smileyphoto2
+    smileyphotolabel2.place(x=1450, y=50)
 
 
-def windowconfig():  # configures window, initializes boss key photo
+# configures window, initializes boss key photo
+def windowconfig():
     global window, canvas, workphoto, workphotolabel
 
     window = Tk()
-
-    window.geometry("1920x1080")
-    window.attributes("-fullscreen", True)
+    window.title("The Impossible Game - Aryan Agrawal")
+    window.iconphoto(False, PhotoImage(file = "smiley.gif"))
+    window.geometry("1870x1030")
+    # window.attributes("-fullscreen", True)
 
     canvas = Canvas(window, width=1920, height=1080)
     canvas.pack()
@@ -116,9 +139,8 @@ def playerconfig(x1=50, y1=540, x2=150, y2=640):
     window.bind(upkey, lambda x: canvas.move(player, 0, -10))
     window.bind(downkey, lambda x: canvas.move(player, 0, 10))
 
+
 # creates black borders and end area for all the levels
-
-
 def level_static():
     global obstacle, endarea
 
@@ -142,16 +164,15 @@ def level_static():
                                       width=0)
     canvas.tag_lower(endarea)
 
+
 # creates obstacles and sets properties and movement based on current level
-
-
 def mainlevel(init=False):
     global bossmode, cheaton, collision, currentlevel, initialrun, \
         isgameover, is_level_over, obstacle, obstaclecoords, \
         obstacledirection, obstaclecount, obstaclespeed, pause, \
         playercoords, loadedfromsave, score
 
-    if init is True:
+    if init is True and isgameover is False:
         if currentlevel == 1:
             speed = 8
             colour = "green"
@@ -193,6 +214,8 @@ def mainlevel(init=False):
         obstaclespeed = []
         obstaclecoords = [(), (), (), (), ()]
         obstaclecount = len(obstaclecoords)
+        initialrun = False
+        scorecounter()
 
         # binds pause key
         window.bind("p", lambda x: displaytext("Paused"))
@@ -221,10 +244,6 @@ def mainlevel(init=False):
     for j in range(obstaclecount):
         obstaclecoords[j] = canvas.coords(obstacle[j])
 
-    # sets initial direction for obstacles (false = down)
-    if init is True and isgameover is False:
-        initialrun = False
-        scorecounter()
     # checks obstacles coords, changing direction so it bounces off borders
     for k in range(len(obstacle)):
         if obstaclecoords[k][3] >= 930:
@@ -244,9 +263,8 @@ def mainlevel(init=False):
         nextlevel()
         window.after(5, mainlevel)
 
+
 # starts the game initially
-
-
 def startgame():
     screenclear()
     canvas.configure(bg="white")
@@ -255,7 +273,7 @@ def startgame():
 
 
 def scorecounter():
-    global score, scoretext
+    global score, scoretext, nextscoreid
 
     try:
         canvas.delete(scoretext)
@@ -271,16 +289,17 @@ def scorecounter():
         if score > 0:
             score -= 1
             # score decreases by 1 every 1s
-            window.after(1000, scorecounter)
+            nextscoreid = window.after(1000, scorecounter)
+
 
 # clears screen
-
-
 def screenclear():
     leaderbutton.destroy()
     startbutton.destroy()
     loadbutton.destroy()
+    keyconfigbutton.destroy()
     smileyphotolabel.destroy()
+    smileyphotolabel2.destroy()
     try:
         savegamebutton.destroy()
     except:
@@ -295,11 +314,11 @@ def screenclear():
                   esctext,
                   pausetext,
                   savetext,
-                  cheattext)
+                  cheattext,
+                  fullscreentext)
+
 
 # displays leaderboard
-
-
 def leaderboard():
     global gohomebutton, leadertext
 
@@ -339,7 +358,8 @@ def leaderboard():
     gohomebutton.place(x=960, y=1000, anchor=CENTER)
 
 
-def updateleaderboard():  # updates leaderboard file
+# updates leaderboard file
+def updateleaderboard():
     global statsbox, nameprompt, finalscore
 
     username = nameprompt.get()
@@ -372,9 +392,8 @@ def updateleaderboard():  # updates leaderboard file
         with open("leaderboard.txt", "w+") as file:
             file.write(username + "," + str(finalscore) + "\n")
 
+
 # clears leaderboard page when user selects to go home
-
-
 def deleteleaderpage():
     for i in range(len(leadertext)):
         canvas.delete(leadertext[i])
@@ -382,9 +401,8 @@ def deleteleaderpage():
     gohomebutton.destroy()
     welcomepage()
 
+
 # displays prompt to save stats to leaderboard
-
-
 def savestats():
     global statsbox, nameprompt
 
@@ -397,9 +415,8 @@ def savestats():
                         command=updateleaderboard)
     namebutton.pack()
 
+
 # checks if level is complete, redirecting player to next level
-
-
 def nextlevel():
     global saveprogressbutton, gameoverbutton, currentlevel, is_level_over,\
         pause, initialrun, savegamebutton, finalscore, score, \
@@ -407,7 +424,7 @@ def nextlevel():
 
     playercoords = canvas.coords(player)
 
-        # checks if player coordinates are at the green area
+    # checks if player coordinates are at the green area
     if playercoords[2] >= 1760:
         is_level_over = True
 
@@ -464,9 +481,8 @@ def nextlevel():
 
         window.unbind("p")
 
+
 # writes player level and score to file
-
-
 def savegame():
     global playercoords, currentlevel, score
 
@@ -478,9 +494,8 @@ def savegame():
 
     savegamebutton.destroy()
 
+
 # loads save from file
-
-
 def loadsave():
     global playercoords, currentlevel, loadedfromsave, score
 
@@ -500,10 +515,9 @@ def loadsave():
 
     loadbutton.destroy()
 
+
 # displays text when you pause, game over or move onto next level
 # deletes said text when recalled
-
-
 def displaytext(inputtext):
     global pause, pausetext, initialrun, currentlevel, finalscore
 
@@ -526,9 +540,8 @@ def displaytext(inputtext):
             scorecounter()
             mainlevel()
 
+
 # goes home when game over/win
-
-
 def restartgame():
     screenclear()
     gameoverbutton.destroy()
@@ -550,12 +563,12 @@ def restartgame():
     for i in range(len(obstacle)):
         canvas.delete(obstacle[i])
 
+    window.after_cancel(nextscoreid)
     initialize()
     welcomepage()
 
+
 # configures quit popup to destroy window
-
-
 def quitgame():
     global pause
     if pause is False:
@@ -569,9 +582,8 @@ def quitgame():
         except:
             pass
 
+
 # checks for collisions between player and obstacles
-
-
 def collisiondetection():
     global gameoverbutton, isgameover, cheaton, collision, obstaclecoords, \
         playercoords, is_level_over, scoretext, finalscore, score
@@ -598,8 +610,8 @@ def collisiondetection():
         score = 200
 
 
-
-def borderdetection():  # stops user going out of bounds
+# stops user going out of bounds
+def borderdetection():
     global playercoords
 
     playercoords = canvas.coords(player)
@@ -625,22 +637,27 @@ def borderdetection():  # stops user going out of bounds
     elif isgameover is False and pause is False:
         window.bind(downkey, lambda x: canvas.move(player, 0, 10))
 
+
 # toggles google docs image when "x" is pressed
-
-
 def bosskey():
     global bossmode, workphotolabel, workphoto
 
     bossmode = not bossmode
 
     smileyphotolabel.destroy()
+    smileyphotolabel2.destroy()
+
 
     if bossmode is True:
         workphotolabel.place(x=-2, y=-2)
+        window.title("Microsoft Edge - Google Docs")
+        window.iconphoto(False, PhotoImage(file = "edge.gif"))
     else:
         workphotolabel.destroy()
         workphotolabel = Label(image=workphoto)
         workphotolabel.image = workphoto
+        window.title("The Impossible Game - Aryan Agrawal")
+        window.iconphoto(False, PhotoImage(file = "smiley.gif"))
 
 
 def cheatmodeon():
@@ -652,43 +669,46 @@ def cheatmodeoff():
     global cheaton
     cheaton = False
 
+
 # prompts user to enter key bindings to control player icon
-
-
 def keyprompt():
     global keypromptbox, upprompt, downprompt, leftprompt, rightprompt
 
     keypromptbox = Tk()
     keypromptbox.title("Enter player control keys:")
     keypromptbox.attributes('-topmost', True)
-    keypromptbox.protocol("WM_DELETE_WINDOW", configurekeys)
 
-    keypromptbox.geometry("+%d+%d" % (500, 500))  # sets location of prompt
+    # sets location of prompt
+    keypromptbox.geometry("+%d+%d" % (500, 500))
 
     upprompt = Entry(keypromptbox, width=50)
-    upprompt.insert(0, "UP (remove this text)")
+    upprompt.insert(0, "w")
     upprompt.pack()
 
     leftprompt = Entry(keypromptbox, width=50)
-    leftprompt.insert(0, "LEFT (remove this text)")
+    leftprompt.insert(0, "a")
     leftprompt.pack()
 
     downprompt = Entry(keypromptbox, width=50)
-    downprompt.insert(0, "DOWN (remove this text)")
+    downprompt.insert(0, "s")
     downprompt.pack()
 
     rightprompt = Entry(keypromptbox, width=50)
-    rightprompt.insert(0, "RIGHT (remove this text)")
+    rightprompt.insert(0, "d")
     rightprompt.pack()
 
     submitkeybutton = Button(keypromptbox, text="Submit",
                              command=configurekeys)
     submitkeybutton.pack()
 
-
-def configurekeys():  # verifies user entries for keyprompt popup
+# verifies user entries for keyprompt popup
+def configurekeys():
     global keypromptbox, upprompt, downprompt, leftprompt, rightprompt,\
         upkey, downkey, leftkey, rightkey
+    window.unbind(leftkey)
+    window.unbind(rightkey)
+    window.unbind(upkey)
+    window.unbind(downkey)
     upkey = upprompt.get()
     downkey = downprompt.get()
     leftkey = leftprompt.get()
@@ -702,7 +722,7 @@ def configurekeys():  # verifies user entries for keyprompt popup
        rightkey.isalpha() is False:
         messagebox.showerror("Invalid input",
                              "Please enter 1 alphabetical character " +
-                              "for each prompt.",
+                             "for each prompt.",
                              icon="error")
         keyprompt()
 
@@ -712,21 +732,21 @@ def configurekeys():  # verifies user entries for keyprompt popup
             rightkey == "x" or upkey == "c" or downkey == "c" or \
             leftkey == "c" or rightkey == "c":
         messagebox.showerror("Invalid input",
-                             "These are protected keys, please choose others",
+                             "p, c and x are protected keys, " +
+                             "please choose others",
                              icon="error")
         keyprompt()
 
     # checks if any of the keys are the same
     elif upkey == downkey or upkey == leftkey or upkey == rightkey or \
             downkey == leftkey or downkey == rightkey or leftkey == rightkey:
-        messagebox.showerror("Invalid input", "They can't be the same!",
+        messagebox.showerror("Invalid input", "The keys can't be the same!",
                              icon="error")
         keyprompt()
     window.lift()
 
 
 # displays text when you beat the game
-
 def displayfinaltext(inputtext):
     global pause, pausetext, initialrun, currentlevel, finalscore
 
@@ -735,12 +755,19 @@ def displayfinaltext(inputtext):
     finalscore = score
 
 
+def initialkeyconfig():
+    global upkey, downkey, leftkey, rightkey
+    upkey = "w"
+    downkey = "s"
+    leftkey = "a"
+    rightkey = "d"
+
 
 # starts the game initially
 score = 200
 windowconfig()
 initialize()
 welcomepage()
-keyprompt()
+initialkeyconfig()
 
 window.mainloop()
