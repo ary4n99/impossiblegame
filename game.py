@@ -15,7 +15,8 @@ import os
 def initialize():  # initializes variables before game is run/rerun
     global currentlevel, obstacle, obstacledirection, obstaclespeed, \
         obstaclecoords, collision, initialrun, pause, bossmode, \
-        loadedfromsave, isgameover, is_level_over, cheaton, scoretext
+        loadedfromsave, isgameover, is_level_over, cheaton, score, \
+        pause, scoretext
 
     currentlevel = 1
     initialrun = True
@@ -23,11 +24,13 @@ def initialize():  # initializes variables before game is run/rerun
     loadedfromsave = False
     isgameover = False
     bossmode = False
-    scoretext = 200
+    pause = False
+    score = 200
+    scoretext = 0
 
     # binds keys for pause, boss mode, cheat mode, and quit
     window.bind("<Escape>", lambda x: quitgame())
-    window.bind("p", lambda x: pausegame("Paused"))
+    window.bind("p", lambda x: displaytext("Paused"))
     window.bind("<KeyPress-c>", lambda x: cheatmodeon())
     window.bind("<KeyRelease-c>", lambda x: cheatmodeoff())
     window.bind("x", lambda x: bosskey())
@@ -146,31 +149,36 @@ def mainlevel(init=False):
     global bossmode, cheaton, collision, currentlevel, initialrun, \
         isgameover, is_level_over, obstacle, obstaclecoords, \
         obstacledirection, obstaclecount, obstaclespeed, pause, \
-        playercoords, loadedfromsave, score, run_id
+        playercoords, loadedfromsave, score
 
-    if currentlevel == 1:
-        speed = 8
-        colour = "green"
-    elif currentlevel == 2:
-        speed = 10
-        colour = "blue"
-    elif currentlevel == 3:
-        speed = 12
-        colour = "black"
-    elif currentlevel == 4:
-        speed = 14
-        colour = "red"
-
-    # sets score to true if a new game is played
     if init is True:
-        if loadedfromsave is False and currentlevel == 1:
-            score = 200
+        if currentlevel == 1:
+            speed = 8
+            colour = "green"
+        elif currentlevel == 2:
+            speed = 10
+            colour = "blue"
+        elif currentlevel == 3:
+            speed = 12
+            colour = "black"
+        elif currentlevel == 4:
+            speed = 14
+            colour = "red"
 
         # destroys and obstacles buttons after game over
         try:
-            gameoverbutton.destroy()
             savegamebutton.destroy()
+        except:
+            pass
+        try:
+            gameoverbutton.destroy()
+        except:
+            pass
+        try:
             canvas.delete(pausetext, player)
+        except:
+            pass
+        try:
             for i in range(len(obstacle)):
                 canvas.delete(obstacle[i])
         except:
@@ -187,7 +195,7 @@ def mainlevel(init=False):
         obstaclecount = len(obstaclecoords)
 
         # binds pause key
-        window.bind("p", lambda x: pausegame("Paused"))
+        window.bind("p", lambda x: displaytext("Paused"))
 
         # creates circles for level 1 and 2 and squares for level 3 and 4
         for i in range(obstaclecount):
@@ -216,9 +224,6 @@ def mainlevel(init=False):
     # sets initial direction for obstacles (false = down)
     if init is True and isgameover is False:
         initialrun = False
-        collisiondetection()
-        borderdetection()
-        nextlevel()
         scorecounter()
     # checks obstacles coords, changing direction so it bounces off borders
     for k in range(len(obstacle)):
@@ -234,11 +239,10 @@ def mainlevel(init=False):
 
     # reruns loop after 5ms if not paused and level isn't over
     if pause is False and is_level_over is False:
-        try:
-            window.after_cancel(run_id)
-        except:
-            pass
-        run_id = window.after(5, mainlevel)
+        collisiondetection()
+        borderdetection()
+        nextlevel()
+        window.after(5, mainlevel)
 
 # starts the game initially
 
@@ -251,7 +255,7 @@ def startgame():
 
 
 def scorecounter():
-    global score, scoretext, run_id2
+    global score, scoretext
 
     try:
         canvas.delete(scoretext)
@@ -266,12 +270,8 @@ def scorecounter():
                                        fill="white")
         if score > 0:
             score -= 1
-        try:
-            window.after_cancel(run_id2)
-        except:
-            pass
-        # score decreases by 1 every 1s
-        run_id2 = window.after(1000, scorecounter)
+            # score decreases by 1 every 1s
+            window.after(1000, scorecounter)
 
 # clears screen
 
@@ -283,6 +283,9 @@ def screenclear():
     smileyphotolabel.destroy()
     try:
         savegamebutton.destroy()
+    except:
+        pass
+    try:
         saveprogressbutton.destroy()
     except:
         pass
@@ -400,77 +403,66 @@ def savestats():
 def nextlevel():
     global saveprogressbutton, gameoverbutton, currentlevel, is_level_over,\
         pause, initialrun, savegamebutton, finalscore, score, \
-        finalscoretext, run_id3
+        finalscoretext
 
     playercoords = canvas.coords(player)
 
-    try:
         # checks if player coordinates are at the green area
-        if playercoords[2] >= 1760:
-            is_level_over = True
+    if playercoords[2] >= 1760:
+        is_level_over = True
 
-            # displays text and buttons to go to next level
-            if currentlevel == 1:
-                currentlevel += 1
-                pausegame("You completed level 1!")
-                gameoverbutton = Button(canvas, text="Level 2",
+        # displays text and buttons to go to next level
+        if currentlevel == 1:
+            currentlevel += 1
+            displaytext("You completed level 1!")
+            gameoverbutton = Button(canvas, text="Level 2",
+                                    font=("Helvetica", 20),
+                                    command=lambda: mainlevel(True))
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            savegamebutton = Button(canvas, text="Save progress",
+                                    font=("Helvetica", 20),
+                                    command=savegame)
+            savegamebutton.place(x=960, y=700, anchor=CENTER)
+        elif currentlevel == 2:
+            currentlevel += 1
+            displaytext("You completed level 2!")
+            gameoverbutton = Button(canvas, text="Level 3",
+                                    font=("Helvetica", 20),
+                                    command=lambda: mainlevel(True))
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            savegamebutton = Button(canvas, text="Save progress",
+                                    font=("Helvetica", 20),
+                                    command=savegame)
+            savegamebutton.place(x=960, y=700, anchor=CENTER)
+        elif currentlevel == 3:
+            currentlevel += 1
+            displaytext("You completed level 3!")
+            gameoverbutton = Button(canvas, text="Level 4",
+                                    font=("Helvetica", 20),
+                                    command=lambda: mainlevel(True))
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            savegamebutton = Button(canvas, text="Save progress",
+                                    font=("Helvetica", 20),
+                                    command=savegame)
+            savegamebutton.place(x=960, y=700, anchor=CENTER)
+        elif currentlevel == 4:
+            displayfinaltext("You beat the impossible game!")
+            finalscoretext = canvas.create_text(960, 75,
+                                                text="Score: " +
+                                                str(score),
+                                                font=("Helvetica", 40),
+                                                fill="white")
+            finalscore = score
+            gameoverbutton = Button(canvas, text="Go home",
+                                    font=("Helvetica", 20),
+                                    command=restartgame)
+            gameoverbutton.place(x=960, y=600, anchor=CENTER)
+            saveprogressbutton = Button(canvas, text="Save score",
                                         font=("Helvetica", 20),
-                                        command=lambda: mainlevel(True))
-                gameoverbutton.place(x=960, y=600, anchor=CENTER)
-                savegamebutton = Button(canvas, text="Save progress",
-                                        font=("Helvetica", 20),
-                                        command=savegame)
-                savegamebutton.place(x=960, y=700, anchor=CENTER)
-            elif currentlevel == 2:
-                currentlevel += 1
-                pausegame("You completed level 2!")
-                gameoverbutton = Button(canvas, text="Level 3",
-                                        font=("Helvetica", 20),
-                                        command=lambda: mainlevel(True))
-                gameoverbutton.place(x=960, y=600, anchor=CENTER)
-                savegamebutton = Button(canvas, text="Save progress",
-                                        font=("Helvetica", 20),
-                                        command=savegame)
-                savegamebutton.place(x=960, y=700, anchor=CENTER)
-            elif currentlevel == 3:
-                currentlevel += 1
-                pausegame("You completed level 3!")
-                gameoverbutton = Button(canvas, text="Level 4",
-                                        font=("Helvetica", 20),
-                                        command=lambda: mainlevel(True))
-                gameoverbutton.place(x=960, y=600, anchor=CENTER)
-                savegamebutton = Button(canvas, text="Save progress",
-                                        font=("Helvetica", 20),
-                                        command=savegame)
-                savegamebutton.place(x=960, y=700, anchor=CENTER)
-            elif currentlevel == 4:
-                displayfinaltext("You beat the impossible game!")
-                finalscoretext = canvas.create_text(960, 75,
-                                                    text="Score: " +
-                                                    str(score),
-                                                    font=("Helvetica", 40),
-                                                    fill="white")
-                finalscore = score
-                gameoverbutton = Button(canvas, text="Go home",
-                                        font=("Helvetica", 20),
-                                        command=restartgame)
-                gameoverbutton.place(x=960, y=600, anchor=CENTER)
-                saveprogressbutton = Button(canvas, text="Save score",
-                                            font=("Helvetica", 20),
-                                            command=savestats)
-                saveprogressbutton.place(x=960, y=700, anchor=CENTER)
+                                        command=savestats)
+            saveprogressbutton.place(x=960, y=700, anchor=CENTER)
 
-            window.unbind("p")
-
-        # repeats if level isn't over
-        if is_level_over is False:
-            try:
-                window.after_cancel(run_id3)
-            except:
-                pass
-            run_id3 = window.after(5, nextlevel)
-    except:
-        pass
+        window.unbind("p")
 
 # writes player level and score to file
 
@@ -512,7 +504,7 @@ def loadsave():
 # deletes said text when recalled
 
 
-def pausegame(inputtext):
+def displaytext(inputtext):
     global pause, pausetext, initialrun, currentlevel, finalscore
 
     if initialrun is False:
@@ -544,8 +536,14 @@ def restartgame():
 
     try:
         saveprogressbutton.destroy()
-        canvas.delete(scoretext)
+    except:
+        pass
+    try:
         canvas.delete(finalscoretext)
+    except:
+        pass
+    try:
+        canvas.delete(scoretext)
     except:
         pass
 
@@ -560,11 +558,8 @@ def restartgame():
 
 def quitgame():
     global pause
-    try:
-        if pause is False:
-            pausegame("Paused")
-    except:
-        pass
+    if pause is False:
+        displaytext("Paused")
     quitbox = messagebox.askquestion("Quit", "Are you sure you want to quit?",
                                      icon="warning")
     if quitbox == 'yes':
@@ -579,25 +574,22 @@ def quitgame():
 
 def collisiondetection():
     global gameoverbutton, isgameover, cheaton, collision, obstaclecoords, \
-        playercoords, is_level_over, scoretext, finalscore, score, run_id4
+        playercoords, is_level_over, scoretext, finalscore, score
 
     playercoords = canvas.coords(player)
 
-    try:
-        # checks the overlapping coordinates for the player
-        collision = canvas.find_overlapping(playercoords[0],
-                                            playercoords[1],
-                                            playercoords[2],
-                                            playercoords[3])
-    except:
-        pass
+    # checks the overlapping coordinates for the player
+    collision = canvas.find_overlapping(playercoords[0],
+                                        playercoords[1],
+                                        playercoords[2],
+                                        playercoords[3])
 
     # if user touches the obstacles, a game over message is displayed
     if len(collision) == 2 and cheaton is False and is_level_over is False \
        and isgameover is False:
 
         isgameover = True
-        pausegame("Game Over!")
+        displaytext("Game Over!")
         gameoverbutton = Button(canvas, text="Go home",
                                 font=("Helvetica", 20),
                                 command=restartgame)
@@ -605,12 +597,6 @@ def collisiondetection():
         window.unbind("p")
         score = 200
 
-    if isgameover is False:  # repeats if game is not over
-        try:
-            window.after_cancel(run_id4)
-        except:
-            pass
-        run_id4 = window.after(5, collisiondetection)
 
 
 def borderdetection():  # stops user going out of bounds
@@ -619,33 +605,25 @@ def borderdetection():  # stops user going out of bounds
     playercoords = canvas.coords(player)
 
     # checks coordinates and unbinds respective key to stop user going further
-    try:
-        if playercoords[0] <= 20:
-            window.unbind(leftkey)
-        elif isgameover is False and pause is False:
-            window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
+    if playercoords[0] <= 20:
+        window.unbind(leftkey)
+    elif isgameover is False and pause is False:
+        window.bind(leftkey, lambda x: canvas.move(player, -10, 0))
 
-        if playercoords[1] <= 150:
-            window.unbind(upkey)
-        elif isgameover is False and pause is False:
-            window.bind(upkey, lambda x: canvas.move(player, 0, -10))
+    if playercoords[1] <= 150:
+        window.unbind(upkey)
+    elif isgameover is False and pause is False:
+        window.bind(upkey, lambda x: canvas.move(player, 0, -10))
 
-        if playercoords[2] >= 1900:
-            window.unbind(rightkey)
-        elif isgameover is False and pause is False:
-            window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
+    if playercoords[2] >= 1900:
+        window.unbind(rightkey)
+    elif isgameover is False and pause is False:
+        window.bind(rightkey, lambda x: canvas.move(player, 10, 0))
 
-        if playercoords[3] >= 930:
-            window.unbind(downkey)
-        elif isgameover is False and pause is False:
-            window.bind(downkey, lambda x: canvas.move(player, 0, 10))
-        try:
-            window.after_cancel(run_id5)
-        except:
-            pass
-        run_id5 = window.after(5, borderdetection)
-    except:
-        pass
+    if playercoords[3] >= 930:
+        window.unbind(downkey)
+    elif isgameover is False and pause is False:
+        window.bind(downkey, lambda x: canvas.move(player, 0, 10))
 
 # toggles google docs image when "x" is pressed
 
@@ -654,10 +632,8 @@ def bosskey():
     global bossmode, workphotolabel, workphoto
 
     bossmode = not bossmode
-    try:
-        smileyphotolabel.destroy()
-    except:
-        pass
+
+    smileyphotolabel.destroy()
 
     if bossmode is True:
         workphotolabel.place(x=-2, y=-2)
@@ -676,16 +652,6 @@ def cheatmodeoff():
     global cheaton
     cheaton = False
 
-# displays text when you beat the game
-
-
-def displayfinaltext(inputtext):
-    global pause, pausetext, initialrun, currentlevel, finalscore
-
-    pausetext = canvas.create_text(960, 450, text=inputtext,
-                                   font=("Helvetica", 80), fill="Black")
-    finalscore = score
-
 # prompts user to enter key bindings to control player icon
 
 
@@ -695,11 +661,8 @@ def keyprompt():
     keypromptbox = Tk()
     keypromptbox.title("Enter player control keys:")
     keypromptbox.attributes('-topmost', True)
-    try:
-        # removes keybind for "X" so window can't be closed
-        keypromptbox.protocol("WM_DELETE_WINDOW", donothing)
-    except:
-        pass
+    keypromptbox.protocol("WM_DELETE_WINDOW", configurekeys)
+
     keypromptbox.geometry("+%d+%d" % (500, 500))  # sets location of prompt
 
     upprompt = Entry(keypromptbox, width=50)
@@ -719,11 +682,11 @@ def keyprompt():
     rightprompt.pack()
 
     submitkeybutton = Button(keypromptbox, text="Submit",
-                             command=configureuserkeys)
+                             command=configurekeys)
     submitkeybutton.pack()
 
 
-def configureuserkeys():  # verifies user entries for keyprompt popup
+def configurekeys():  # verifies user entries for keyprompt popup
     global keypromptbox, upprompt, downprompt, leftprompt, rightprompt,\
         upkey, downkey, leftkey, rightkey
     upkey = upprompt.get()
@@ -738,8 +701,8 @@ def configureuserkeys():  # verifies user entries for keyprompt popup
        downkey.isalpha() is False or leftkey.isalpha() is False or \
        rightkey.isalpha() is False:
         messagebox.showerror("Invalid input",
-                             "Please enter 1 alphabetical character \
-                              for each prompt.",
+                             "Please enter 1 alphabetical character " +
+                              "for each prompt.",
                              icon="error")
         keyprompt()
 
@@ -762,8 +725,15 @@ def configureuserkeys():  # verifies user entries for keyprompt popup
     window.lift()
 
 
-def donothing():
-    pass
+# displays text when you beat the game
+
+def displayfinaltext(inputtext):
+    global pause, pausetext, initialrun, currentlevel, finalscore
+
+    pausetext = canvas.create_text(960, 450, text=inputtext,
+                                   font=("Helvetica", 80), fill="Black")
+    finalscore = score
+
 
 
 # starts the game initially
