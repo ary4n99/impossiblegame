@@ -4,10 +4,14 @@ import sys
 import random
 import os
 
-# RESOLUTION: 1920x1080 (YOU MUST SET THE OS SCREEN RESOLUTION TO THIS FOR THE
-# GAME TO WORK PROPERLY)
+# RESOLUTION: 1920x1080
 #
 # CHEATKEY: hold c for invincibility
+# BOSSKEY: press x to toggle google docs
+# PAUSE: press p to toggle
+#
+# If you win, you can add your score to the leaderboard
+# You can save progress after each level
 #
 # (SOURCES FOR PHOTOS)
 # https://creazilla.com/nodes/55045-ok-hand-emoji-clipart
@@ -217,16 +221,16 @@ def mainlevel(init=False):
                                                    (i + 1) * 300,
                                                    400 + i * 300,
                                                    400 + i * 300,
-                                                   fill=colours\
-                                                       [currentlevel - 1],
+                                                   fill=colours
+                                                   [currentlevel - 1],
                                                    width=5))
             else:
                 obstacle.append(canvas.create_rectangle((i + 1) * 300,
                                                         (i + 1) * 300,
                                                         400 + i * 300,
                                                         400 + i * 300,
-                                                        fill=colours\
-                                                            [currentlevel - 1],
+                                                        fill=colours
+                                                        [currentlevel - 1],
                                                         width=5))
 
             # selects random speed based on base speed value
@@ -424,7 +428,7 @@ def nextlevel():
 
         # displays text and buttons to go to next level
         if currentlevel < 5:
-            displaytext("You completed level %i!" %currentlevel)
+            displaytext("You completed level %i!" % currentlevel)
             gameoverbutton = Button(canvas,
                                     text="Level " + str(currentlevel + 1),
                                     font=("Helvetica", 20),
@@ -558,7 +562,7 @@ def quitgame():
 
 # checks for collisions between player and obstacles
 def collisiondetection():
-    global gameoverbutton, isgameover, cheattoggle, collision, obstaclecoords, \
+    global gameoverbutton, isgameover, cheattoggle, collision, obstaclecoords,\
         playercoords, is_level_over, scoretext, finalscore, score
 
     playercoords = canvas.coords(player)
@@ -570,7 +574,7 @@ def collisiondetection():
                                         playercoords[3])
 
     # if user touches the obstacles, a game over message is displayed
-    if len(collision) == 2 and cheattoggle is False and is_level_over is False \
+    if len(collision) == 2 and cheattoggle is False and is_level_over is False\
        and isgameover is False:
 
         isgameover = True
