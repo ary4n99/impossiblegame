@@ -174,7 +174,7 @@ def mainlevel(init=False):
 
     if init is True and isgameover is False:
         colours = ["green", "blue", "black", "red", "white"]
-        speed = 2 * currentlevel + 5
+        speed = 2 * currentlevel + 3
 
         # destroys and obstacles buttons after game over
         try:
