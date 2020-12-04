@@ -46,7 +46,7 @@ def initialize():
 
 def welcomepage():
     global startbutton, leaderbutton, welcometext, esctext, titletext, \
-        pausetext, savetext, loadbutton, smileyphotolabel, cheattext, \
+        pausetext, loadbutton, smileyphotolabel, cheattext, \
         keyconfigbutton, fullscreentext, smileyphotolabel2
 
     # creates black background
@@ -99,12 +99,6 @@ def welcomepage():
                                    "x to toggle work mode (boss key)",
                                    font=("Helvetica", 10),
                                    fill="white")
-    savetext = canvas.create_text(960, 1000,
-                                  text="You can save progress at the end " +
-                                  "of each level, and add to the " +
-                                  "leaderboard if you win!",
-                                  font=("Helvetica", 10),
-                                  fill="white")
 
     # creates photo for homepage
     smileyphoto = PhotoImage(file="smiley.gif")
@@ -309,7 +303,6 @@ def screenclear():
                   titletext,
                   esctext,
                   pausetext,
-                  savetext,
                   cheattext,
                   fullscreentext)
 
