@@ -18,26 +18,26 @@ import os
 # initializes variables before game is run/rerun
 def initialize():
     global currentlevel, obstacle, obstacledirection, obstaclespeed, \
-        obstaclecoords, collision, initialrun, pause, bossmode, \
-        loadedfromsave, isgameover, is_level_over, cheaton, score, \
+        obstaclecoords, collision, initialrun, pause, workmode, \
+        loadedfromsave, isgameover, is_level_over, cheattoggle, score, \
         pause, scoretext
 
     currentlevel = 1
     initialrun = True
-    cheaton = False
+    cheattoggle = False
     loadedfromsave = False
     isgameover = False
-    bossmode = False
+    workmode = False
     pause = False
     score = 200
     scoretext = 0
 
-    # binds keys for pause, boss mode, cheat mode, and quit
+    # binds keys for pause, work mode, cheat mode, and quit
     window.bind("<Escape>", lambda x: quitgame())
     window.bind("p", lambda x: displaytext("Paused"))
     window.bind("<KeyPress-c>", lambda x: cheatmodeon())
     window.bind("<KeyRelease-c>", lambda x: cheatmodeoff())
-    window.bind("x", lambda x: bosskey())
+    window.bind("x", lambda x: workmodetoggle())
 
 
 def welcomepage():
@@ -167,7 +167,7 @@ def level_static():
 
 # creates obstacles and sets properties and movement based on current level
 def mainlevel(init=False):
-    global bossmode, cheaton, collision, currentlevel, initialrun, \
+    global workmode, cheattoggle, collision, currentlevel, initialrun, \
         isgameover, is_level_over, obstacle, obstaclecoords, \
         obstacledirection, obstaclecount, obstaclespeed, pause, \
         playercoords, loadedfromsave, score
@@ -366,6 +366,7 @@ def updateleaderboard():
     statsbox.destroy()
     saveprogressbutton.destroy()
     scorelist = []
+    namelist = []
 
     # tries to open leaderboard and add name to file
     if os.path.isfile("leaderboard.txt") is True:
@@ -374,19 +375,20 @@ def updateleaderboard():
         for i in range(len(leaderboard)):
             leadersplit = leaderboard[i].split(",")
             scorelist.append(leadersplit[1])
+            namelist.append(leadersplit[0])
 
         insertindex = len(scorelist) + 1
         for i in range(len(scorelist)):
             if int(scorelist[i]) <= finalscore:
                 insertindex = i
                 break
+
+        leaderboard.insert(insertindex, username + "," + str(finalscore))
+
         with open("leaderboard.txt", "w") as file:
             for i in range(len(leaderboard)):
-                if i == insertindex:
-                    file.write(username + "," + str(finalscore) + "\n")
-                    file.write(leaderboard[i] + "\n")
-                else:
-                    file.write(leaderboard[i] + "\n")
+                file.write(leaderboard[i] + "\n")
+
     else:
         # if it doesn't exist, the file is created and details are added
         with open("leaderboard.txt", "w+") as file:
@@ -585,7 +587,7 @@ def quitgame():
 
 # checks for collisions between player and obstacles
 def collisiondetection():
-    global gameoverbutton, isgameover, cheaton, collision, obstaclecoords, \
+    global gameoverbutton, isgameover, cheattoggle, collision, obstaclecoords, \
         playercoords, is_level_over, scoretext, finalscore, score
 
     playercoords = canvas.coords(player)
@@ -597,7 +599,7 @@ def collisiondetection():
                                         playercoords[3])
 
     # if user touches the obstacles, a game over message is displayed
-    if len(collision) == 2 and cheaton is False and is_level_over is False \
+    if len(collision) == 2 and cheattoggle is False and is_level_over is False \
        and isgameover is False:
 
         isgameover = True
@@ -639,17 +641,17 @@ def borderdetection():
 
 
 # toggles google docs image when "x" is pressed
-def bosskey():
-    global bossmode, workphotolabel, workphoto
+def workmodetoggle():
+    global workmode, workphotolabel, workphoto
 
-    bossmode = not bossmode
+    workmode = not workmode
 
     smileyphotolabel.destroy()
     smileyphotolabel2.destroy()
 
-    if bossmode is True:
+    if workmode is True:
         workphotolabel.place(x=-2, y=-2)
-        window.title("Microsoft Edge - Google Docs")
+        window.title("Microsoft Edge")
         window.iconphoto(False, PhotoImage(file="edge.gif"))
     else:
         workphotolabel.destroy()
@@ -660,13 +662,13 @@ def bosskey():
 
 
 def cheatmodeon():
-    global cheaton
-    cheaton = True
+    global cheattoggle
+    cheattoggle = True
 
 
 def cheatmodeoff():
-    global cheaton
-    cheaton = False
+    global cheattoggle
+    cheattoggle = False
 
 
 # prompts user to enter key bindings to control player icon
