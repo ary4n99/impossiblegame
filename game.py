@@ -174,7 +174,7 @@ def mainlevel(init=False):
 
     if init is True and isgameover is False:
         colours = ["green", "blue", "black", "red", "white"]
-        speed = 2 * currentlevel + 7
+        speed = 2 * currentlevel + 5
 
         # destroys and obstacles buttons after game over
         try:
@@ -347,7 +347,7 @@ def leaderboard():
 
     gohomebutton = Button(canvas, text="Go home", font=("Helvetica", 20),
                           command=deleteleaderpage)
-    gohomebutton.place(x=960, y=1000, anchor=CENTER)
+    gohomebutton.place(x=960, y=900, anchor=CENTER)
 
 
 # updates leaderboard file
