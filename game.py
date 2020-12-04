@@ -173,18 +173,8 @@ def mainlevel(init=False):
         playercoords, loadedfromsave, score
 
     if init is True and isgameover is False:
-        if currentlevel == 1:
-            speed = 8
-            colour = "green"
-        elif currentlevel == 2:
-            speed = 10
-            colour = "blue"
-        elif currentlevel == 3:
-            speed = 12
-            colour = "black"
-        elif currentlevel == 4:
-            speed = 14
-            colour = "red"
+        colours = ["green", "blue", "black", "red", "white"]
+        speed = 2 * currentlevel + 7
 
         # destroys and obstacles buttons after game over
         try:
@@ -222,19 +212,21 @@ def mainlevel(init=False):
 
         # creates circles for level 1 and 2 and squares for level 3 and 4
         for i in range(obstaclecount):
-            if currentlevel == 1 or currentlevel == 2:
+            if currentlevel <= 2:
                 obstacle.append(canvas.create_oval((i + 1) * 300,
                                                    (i + 1) * 300,
                                                    400 + i * 300,
                                                    400 + i * 300,
-                                                   fill=colour,
+                                                   fill=colours\
+                                                       [currentlevel - 1],
                                                    width=5))
             else:
                 obstacle.append(canvas.create_rectangle((i + 1) * 300,
                                                         (i + 1) * 300,
                                                         400 + i * 300,
                                                         400 + i * 300,
-                                                        fill=colour,
+                                                        fill=colours\
+                                                            [currentlevel - 1],
                                                         width=5))
 
             # selects random speed based on base speed value
@@ -431,10 +423,10 @@ def nextlevel():
         is_level_over = True
 
         # displays text and buttons to go to next level
-        if currentlevel == 1:
-            currentlevel += 1
-            displaytext("You completed level 1!")
-            gameoverbutton = Button(canvas, text="Level 2",
+        if currentlevel < 5:
+            displaytext("You completed level %i!" %currentlevel)
+            gameoverbutton = Button(canvas,
+                                    text="Level " + str(currentlevel + 1),
                                     font=("Helvetica", 20),
                                     command=lambda: mainlevel(True))
             gameoverbutton.place(x=960, y=600, anchor=CENTER)
@@ -442,29 +434,8 @@ def nextlevel():
                                     font=("Helvetica", 20),
                                     command=savegame)
             savegamebutton.place(x=960, y=700, anchor=CENTER)
-        elif currentlevel == 2:
             currentlevel += 1
-            displaytext("You completed level 2!")
-            gameoverbutton = Button(canvas, text="Level 3",
-                                    font=("Helvetica", 20),
-                                    command=lambda: mainlevel(True))
-            gameoverbutton.place(x=960, y=600, anchor=CENTER)
-            savegamebutton = Button(canvas, text="Save progress",
-                                    font=("Helvetica", 20),
-                                    command=savegame)
-            savegamebutton.place(x=960, y=700, anchor=CENTER)
-        elif currentlevel == 3:
-            currentlevel += 1
-            displaytext("You completed level 3!")
-            gameoverbutton = Button(canvas, text="Level 4",
-                                    font=("Helvetica", 20),
-                                    command=lambda: mainlevel(True))
-            gameoverbutton.place(x=960, y=600, anchor=CENTER)
-            savegamebutton = Button(canvas, text="Save progress",
-                                    font=("Helvetica", 20),
-                                    command=savegame)
-            savegamebutton.place(x=960, y=700, anchor=CENTER)
-        elif currentlevel == 4:
+        else:
             displayfinaltext("You beat the impossible game!")
             finalscoretext = canvas.create_text(960, 75,
                                                 text="Score: " +
